@@ -24,6 +24,14 @@ export interface EditorInfo {
   icon: string; // base64 PNG data URL from the system app icon
 }
 
+export type UpdateEvent =
+  | { type: 'checking' }
+  | { type: 'available'; version: string }
+  | { type: 'not-available' }
+  | { type: 'downloading'; percent: number }
+  | { type: 'downloaded'; version: string }
+  | { type: 'error'; message: string };
+
 /** The typed API exposed on window.electronAPI via contextBridge */
 export interface ElectronAPI {
   // Repository
@@ -86,4 +94,10 @@ export interface ElectronAPI {
 
   // System
   getPlatform(): Promise<string>;
+
+  // Updates
+  checkForUpdate(): Promise<void>;
+  downloadUpdate(): Promise<void>;
+  installUpdate(): Promise<void>;
+  onUpdateEvent(callback: (event: UpdateEvent) => void): () => void;
 }

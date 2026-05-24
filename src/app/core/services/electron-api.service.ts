@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, fromEventPattern } from 'rxjs';
-import type { ElectronAPI, EditorInfo, RepoInfo } from '../../../../shared/ipc-api.types';
+import type { ElectronAPI, EditorInfo, RepoInfo, UpdateEvent } from '../../../../shared/ipc-api.types';
 import type { AppSettings } from '../../../../shared/settings.types';
 import type {
   BranchInfo,
@@ -164,5 +164,22 @@ export class ElectronApiService {
   // System
   getPlatform(): Observable<string> {
     return from(this.api.getPlatform());
+  }
+
+  // Updates
+  checkForUpdate(): Observable<void> {
+    return from(this.api.checkForUpdate());
+  }
+  downloadUpdate(): Observable<void> {
+    return from(this.api.downloadUpdate());
+  }
+  installUpdate(): Observable<void> {
+    return from(this.api.installUpdate());
+  }
+  onUpdateEvent(): Observable<UpdateEvent> {
+    return fromEventPattern<UpdateEvent>(
+      (handler) => this.api.onUpdateEvent(handler as (e: UpdateEvent) => void),
+      (_, cleanup) => typeof cleanup === 'function' && cleanup(),
+    );
   }
 }
