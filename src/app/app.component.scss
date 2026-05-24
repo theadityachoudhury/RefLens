@@ -8,8 +8,8 @@
   height: 40px;
   flex-shrink: 0;
   -webkit-app-region: drag;
-  background: #0d1117;
-  border-bottom: 1px solid #21262d;
+  background: var(--bg-canvas);
+  border-bottom: 1px solid var(--border-default);
   display: flex;
   align-items: center;
   justify-content: flex-end;

@@ -1,18 +1,27 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, Injector, OnDestroy, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   BehaviorSubject,
-  Subscription,
-  switchMap,
-  tap,
-  timer,
   EMPTY,
+  Subscription,
+  filter,
+  switchMap,
+  take,
+  timer,
 } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ElectronApiService } from './electron-api.service';
+import { SettingsService } from './settings.service';
 import type { RepoInfo } from '../../../../shared/ipc-api.types';
 import type { RepositoryStatus } from '../../../../shared/git.types';
 
 @Injectable({ providedIn: 'root' })
 export class RepositoryService implements OnDestroy {
+  private readonly api = inject(ElectronApiService);
+  private readonly settings = inject(SettingsService);
+  private readonly injector = inject(Injector);
+  private readonly router = inject(Router);
+
   private readonly _activeRepo = new BehaviorSubject<RepoInfo | null>(null);
   readonly activeRepo$ = this._activeRepo.asObservable();
 
@@ -24,8 +33,6 @@ export class RepositoryService implements OnDestroy {
 
   private statusSub: Subscription | null = null;
   private statusChangedSub: Subscription | null = null;
-
-  constructor(private api: ElectronApiService) {}
 
   get activeRepo(): RepoInfo | null {
     return this._activeRepo.value;
@@ -52,13 +59,30 @@ export class RepositoryService implements OnDestroy {
     this.startStatusPolling(repo.path);
   }
 
+  tryRestoreLastRepo(): void {
+    // Gate on settings.ready$ so the restoreLastRepo flag is read from persisted
+    // settings, not DEFAULT_SETTINGS (which has it false). Safe to call at any
+    // time — the ready$ ReplaySubject replays immediately if settings are loaded.
+    this.settings.ready$.pipe(
+      take(1),
+      filter(() => this.settings.restoreLastRepo()),
+      switchMap(() => this.api.getRecentRepositories()),
+    ).subscribe((repos) => {
+      if (repos[0]) {
+        this.openRecentRepository(repos[0]);
+        this.router.navigate(['/graph']);
+      }
+    });
+  }
+
   private startStatusPolling(repoPath: string): void {
     this.statusSub?.unsubscribe();
     this.statusChangedSub?.unsubscribe();
 
-    this.statusSub = timer(0, 3000)
-      .pipe(switchMap(() => this.api.getRepositoryStatus(repoPath)))
-      .subscribe((status) => this._status.next(status));
+    this.statusSub = toObservable(this.settings.refreshInterval, { injector: this.injector }).pipe(
+      switchMap((interval) => interval === 0 ? EMPTY : timer(0, interval)),
+      switchMap(() => this.api.getRepositoryStatus(repoPath)),
+    ).subscribe((status) => this._status.next(status));
 
     this.statusChangedSub = this.api.onStatusChanged()
       .subscribe((status) => this._status.next(status));

@@ -1,0 +1,91 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { SettingsService } from '../../../core/services/settings.service';
+import { AppSettings } from '../../../../../shared/settings.types';
+
+@Component({
+  selector: 'rl-settings-application-tab',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="settings-section">
+      <h2 class="settings-section__title">Startup</h2>
+
+      <div class="settings-row">
+        <div class="settings-row__info">
+          <div class="settings-row__label">Restore last repository on startup</div>
+          <div class="settings-row__hint">Automatically reopen the most recently used repository</div>
+        </div>
+        <div class="settings-row__control">
+          <label class="toggle" [class.toggle--on]="s.restoreLastRepo()">
+            <input type="checkbox" [checked]="s.restoreLastRepo()" (change)="toggle('restoreLastRepo')" />
+            <span class="toggle__track"></span>
+            <span class="toggle__thumb"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-row__info">
+          <div class="settings-row__label">Open DevTools on launch</div>
+          <div class="settings-row__hint">Automatically open the Chromium DevTools window on startup</div>
+        </div>
+        <div class="settings-row__control">
+          <label class="toggle" [class.toggle--on]="s.snapshot.openDevTools">
+            <input type="checkbox" [checked]="s.snapshot.openDevTools" (change)="toggle('openDevTools')" />
+            <span class="toggle__track"></span>
+            <span class="toggle__thumb"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2 class="settings-section__title">Conflict Resolution</h2>
+
+      <div class="settings-row">
+        <div class="settings-row__info">
+          <div class="settings-row__label">Auto-stage after resolving</div>
+          <div class="settings-row__hint">Automatically stage the resolved file after confirming a resolution</div>
+        </div>
+        <div class="settings-row__control">
+          <label class="toggle" [class.toggle--on]="s.autoStage()">
+            <input type="checkbox" [checked]="s.autoStage()" (change)="toggle('autoStageAfterResolve')" />
+            <span class="toggle__track"></span>
+            <span class="toggle__thumb"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2 class="settings-section__title">Worktree</h2>
+
+      <div class="settings-row">
+        <div class="settings-row__info">
+          <div class="settings-row__label">Worktree base path</div>
+          <div class="settings-row__hint">Directory where temporary worktrees are created for "Run & Test"</div>
+        </div>
+        <div class="settings-row__control">
+          <input
+            class="text-input"
+            type="text"
+            placeholder="/tmp/reflens"
+            [value]="s.snapshot.worktreePath"
+            (change)="set('worktreePath', $any($event.target).value)"
+          />
+        </div>
+      </div>
+    </div>
+  `,
+})
+export class SettingsApplicationTabComponent {
+  protected readonly s = inject(SettingsService);
+
+  set<K extends keyof AppSettings>(key: K, value: AppSettings[K]): void {
+    this.s.update({ [key]: value } as Partial<AppSettings>);
+  }
+
+  toggle(key: 'restoreLastRepo' | 'openDevTools' | 'autoStageAfterResolve'): void {
+    this.s.update({ [key]: !this.s.snapshot[key] } as Partial<AppSettings>);
+  }
+}

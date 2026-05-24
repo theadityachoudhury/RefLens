@@ -1,0 +1,109 @@
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { ReplaySubject } from 'rxjs';
+import { ElectronApiService } from './electron-api.service';
+import { AppSettings, DEFAULT_SETTINGS } from '../../../../shared/settings.types';
+
+@Injectable({ providedIn: 'root' })
+export class SettingsService {
+  private readonly api = inject(ElectronApiService);
+  private readonly _settings = signal<AppSettings>(DEFAULT_SETTINGS);
+  private readonly _platform = signal<string>('darwin');
+
+  // Computed selectors
+  readonly theme             = computed(() => this._settings().theme);
+  readonly monacoTheme       = computed(() => this.resolvedTheme() === 'light' ? 'vs' : 'vs-dark');
+  readonly rowHeight         = computed(() => ({ compact: 22, normal: 28, spacious: 36 })[this._settings().graphDensity]);
+  readonly commitRadius      = computed(() => this._settings().graphCommitDotSize);
+  readonly laneColorPalette  = computed(() => this._settings().graphLaneColorPalette);
+  readonly graphMaxCommits   = computed(() => this._settings().graphMaxCommits);
+  readonly graphShowAllBranches = computed(() => this._settings().graphShowAllBranches);
+  readonly editorFontSize    = computed(() => this._settings().editorFontSize);
+  readonly editorWordWrap    = computed(() => this._settings().editorWordWrap);
+  readonly editorLineNumbers = computed(() => this._settings().editorLineNumbers);
+  readonly editorMinimap     = computed(() => this._settings().editorMinimap);
+  readonly editorDiffLayout  = computed(() => this._settings().editorDiffLayout);
+  readonly refreshInterval   = computed(() => this._settings().statusRefreshInterval);
+  readonly restoreLastRepo   = computed(() => this._settings().restoreLastRepo);
+  readonly autoStage         = computed(() => this._settings().autoStageAfterResolve);
+
+  /** The Node.js platform string from the main process — more reliable than navigator.platform. */
+  readonly platform  = computed(() => this._platform());
+  readonly isMac     = computed(() => this._platform() === 'darwin');
+  readonly isWindows = computed(() => this._platform() === 'win32');
+
+  private readonly _sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+  // Signal-backed mirror of the media query so computed selectors that depend
+  // on it (resolvedTheme, monacoTheme) are invalidated when the OS theme changes.
+  private readonly _sysDarkMatches = signal(this._sysDark.matches);
+  private readonly _ready$ = new ReplaySubject<void>(1);
+
+  /** Emits once (and replays to late subscribers) after the first IPC settings
+   *  response arrives. Code that must run with real persisted settings — such as
+   *  "restore last repo on startup" — should gate on this instead of reading
+   *  signals synchronously in ngOnInit, where DEFAULT_SETTINGS is still active. */
+  readonly ready$ = this._ready$.asObservable();
+
+  readonly resolvedTheme = computed<'dark' | 'light'>(() => {
+    const t = this._settings().theme;
+    if (t !== 'system') return t;
+    return this._sysDarkMatches() ? 'dark' : 'light';
+  });
+
+  constructor() {
+    this.api.getSettings().subscribe(s => {
+      this._settings.set(s);
+      this.applyToDOM(s);
+      this._ready$.next();
+    });
+
+    this.api.getPlatform().subscribe(p => this._platform.set(p));
+
+    this._sysDark.addEventListener('change', (e: MediaQueryListEvent) => {
+      this._sysDarkMatches.set(e.matches);  // invalidates resolvedTheme + monacoTheme
+      this.applyToDOM(this._settings());
+    });
+  }
+
+  get snapshot(): AppSettings {
+    return this._settings();
+  }
+
+  update(patch: Partial<AppSettings>): void {
+    this.api.setSettings(patch).subscribe(updated => {
+      this._settings.set(updated);
+      this.applyToDOM(updated);
+    });
+  }
+
+  reset(): void {
+    this.api.resetSettings().subscribe(updated => {
+      this._settings.set(updated);
+      this.applyToDOM(updated);
+    });
+  }
+
+  private applyToDOM(s: AppSettings): void {
+    const isDark = s.theme === 'dark' ||
+      (s.theme === 'system' && this._sysDarkMatches());
+
+    document.body.classList.toggle('theme-light', !isDark);
+
+    // Accent classes
+    (['purple', 'green', 'teal', 'pink'] as const).forEach(c =>
+      document.body.classList.remove(`accent-${c}`),
+    );
+    if (s.accentColor !== 'blue') {
+      document.body.classList.add(`accent-${s.accentColor}`);
+    }
+
+    // Font size class
+    (['small', 'medium', 'large'] as const).forEach(c =>
+      document.body.classList.remove(`font-${c}`),
+    );
+    document.body.classList.add(`font-${s.uiFontSize}`);
+
+    // Monaco global theme
+    const monaco = (window as unknown as { monaco?: { editor: { setTheme(t: string): void } } }).monaco;
+    monaco?.editor.setTheme(isDark ? 'vs-dark' : 'vs');
+  }
+}

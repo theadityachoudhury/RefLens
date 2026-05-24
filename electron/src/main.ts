@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, Menu } from "electron";
 import path from "path";
 import { config } from "dotenv";
 import { registerGlobalHandlers } from "./ipc/index";
+import { readSettings } from "./settings/settings.store";
 
 config({ path: path.join(__dirname, "../../../.env") });
 
@@ -31,12 +32,14 @@ export function createWindow(): BrowserWindow {
 
 	if (isDev) {
 		win.loadURL("http://localhost:4200");
-		if (wantDeveloperToolsToOpen) {
-			win.webContents.openDevTools({ mode: "detach" });
-		}
 	} else {
 		win.loadFile(path.join(__dirname, "../../../dist/browser/index.html"));
 	}
+
+	win.webContents.once("did-finish-load", () => {
+		const openDevTools = wantDeveloperToolsToOpen || readSettings().openDevTools;
+		if (openDevTools) win.webContents.openDevTools({ mode: "detach" });
+	});
 
 	win.webContents.on("will-navigate", (event, url) => {
 		if (!isDev || !url.startsWith("http://localhost:4200")) {

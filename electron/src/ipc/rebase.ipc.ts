@@ -2,13 +2,25 @@ import { ipcMain } from 'electron';
 import { spawn } from 'child_process';
 import { getGit } from '../git/git.service';
 import { createSequenceEditorScript } from '../git/rebase.editor';
+import { readSettings } from '../settings/settings.store';
+import { isGitRef, isGitHash, isRebaseAction, isBoundedString } from './ipc-guards';
 import type { RebaseEntry } from '../../../shared/git.types';
+
+function isValidEntry(e: unknown): e is RebaseEntry {
+  if (!e || typeof e !== 'object') return false;
+  const entry = e as Record<string, unknown>;
+  return (
+    isRebaseAction(entry['action']) &&
+    isGitHash(entry['hash']) &&
+    isBoundedString(entry['subject'], 500)
+  );
+}
 
 export function registerRebaseHandlers(): void {
   ipcMain.handle('rebase:state', async (_, repoPath: string) => {
     const git = getGit(repoPath);
     try {
-      const log = await git.log({ maxCount: 20 });
+      const log = await git.log({ maxCount: readSettings().rebaseDepth });
       return {
         entries: log.all.map((c) => ({
           action: 'pick' as const,
@@ -23,8 +35,19 @@ export function registerRebaseHandlers(): void {
     }
   });
 
-  ipcMain.handle('rebase:start', async (_, repoPath: string, ontoRef: string, entries: RebaseEntry[]) => {
-    const scriptPath = createSequenceEditorScript(entries);
+  ipcMain.handle('rebase:start', async (_, repoPath: string, ontoRef: string, entries: unknown[]) => {
+    // ontoRef must not start with '-' to block --exec=<shell-cmd> injection
+    if (!isGitRef(ontoRef)) throw new Error(`Invalid rebase ref: ${ontoRef}`);
+
+    if (!Array.isArray(entries) || entries.length === 0 || entries.length > 500) {
+      throw new Error('entries must be a non-empty array of at most 500 items');
+    }
+    const validated = entries.map((e, i) => {
+      if (!isValidEntry(e)) throw new Error(`Invalid rebase entry at index ${i}`);
+      return e;
+    });
+
+    const scriptPath = createSequenceEditorScript(validated);
 
     return new Promise<void>((resolve, reject) => {
       const proc = spawn('git', ['rebase', '--interactive', ontoRef], {

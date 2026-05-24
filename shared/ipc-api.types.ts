@@ -11,6 +11,7 @@ import type {
   TagInfo,
   WorktreeInfo,
 } from './git.types';
+import type { AppSettings } from './settings.types';
 
 export interface RepoInfo {
   path: string;
@@ -77,4 +78,12 @@ export interface ElectronAPI {
   // Editor integration
   getAvailableEditors(): Promise<EditorInfo[]>;
   openInEditor(repoPath: string, editorId: string): Promise<void>;
+
+  // Settings
+  getSettings(): Promise<AppSettings>;
+  setSettings(patch: Partial<AppSettings>): Promise<AppSettings>;
+  resetSettings(): Promise<AppSettings>;
+
+  // System
+  getPlatform(): Promise<string>;
 }

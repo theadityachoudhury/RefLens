@@ -1,11 +1,17 @@
 import { ipcMain } from 'electron';
 import { getGit } from '../git/git.service';
+import { isGitHash, isBoundedString } from './ipc-guards';
 import type { DiffFile, DiffHunk, DiffLine } from '../../../shared/git.types';
 
 export function registerDiffHandlers(): void {
   ipcMain.handle('diff:file', async (_, repoPath: string, hash: string, filePath: string) => {
+    if (!isGitHash(hash))           throw new Error(`Invalid commit hash: ${hash}`);
+    if (!isBoundedString(filePath, 4096)) throw new Error(`Invalid file path: ${filePath}`);
+
     const git = getGit(repoPath);
-    const raw = await git.raw(['show', `${hash}:${filePath}`, '--', filePath].filter(Boolean));
+    // Pass hash and filePath as separate argv elements — never concatenated into
+    // a single string that git would parse, preventing object-expression injection.
+    const raw = await git.raw(['show', `${hash}:${filePath}`, '--', filePath]);
     return parseDiff(raw, filePath);
   });
 }
