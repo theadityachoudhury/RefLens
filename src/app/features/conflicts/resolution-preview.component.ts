@@ -1,10 +1,10 @@
 import {
-  Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetectionStrategy,
+  Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { MonacoEditorModule, DiffEditorModel } from 'ngx-monaco-editor-v2';
 import { ConflictService, ResolutionOption } from './conflict.service';
 import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
@@ -30,6 +30,10 @@ export class ResolutionPreviewComponent implements OnInit, OnDestroy {
   resolvedContent = signal('');
   isManual = signal(false);
 
+  // Monaco diff models (before → after)
+  originalModel = signal<DiffEditorModel>({ code: '', language: 'plaintext' });
+  modifiedModel = signal<DiffEditorModel>({ code: '', language: 'plaintext' });
+
   // Run & Test state
   runCommand = signal('');
   processOutput = signal<string[]>([]);
@@ -50,7 +54,7 @@ export class ResolutionPreviewComponent implements OnInit, OnDestroy {
     minimap: { enabled: false },
     fontSize: 12,
     scrollBeyondLastLine: false,
-    language: 'plaintext',
+    enableSplitViewResizing: true,
   };
 
   readonly manualEditorOptions = {
@@ -61,6 +65,18 @@ export class ResolutionPreviewComponent implements OnInit, OnDestroy {
     language: 'plaintext',
   };
 
+  constructor() {
+    // Recompute diff models whenever file or resolved content changes
+    effect(() => {
+      const f = this.file();
+      const resolved = this.resolvedContent();
+      if (!f) return;
+      const lang = this.languageFromPath(f.path);
+      this.originalModel.set({ code: f.oursView, language: lang });
+      this.modifiedModel.set({ code: resolved, language: lang });
+    });
+  }
+
   ngOnInit(): void {
     const idx = Number(this.route.snapshot.paramMap.get('fileIndex') ?? '0');
     const opt = this.route.snapshot.paramMap.get('option') as ResolutionOption;
@@ -69,16 +85,36 @@ export class ResolutionPreviewComponent implements OnInit, OnDestroy {
     this.isManual.set(opt === 'manual');
 
     if (this.conflictService.files().length === 0) {
+      // Load then set content once files arrive
       this.conflictService.load();
+      const stopEffect = effect(() => {
+        const f = this.file();
+        if (!f) return;
+        this.setResolvedContent(f, opt);
+        stopEffect.destroy();
+      });
+    } else {
+      const f = this.file();
+      if (f) this.setResolvedContent(f, opt);
     }
+  }
 
-    const file = this.file();
-    if (file) {
-      const content = opt === 'manual'
-        ? file.oursView
-        : (this.conflictService.getResolutionContent(file, opt) ?? file.oursView);
-      this.resolvedContent.set(content);
-    }
+  private setResolvedContent(file: ConflictFile, opt: ResolutionOption): void {
+    const content = opt === 'manual'
+      ? file.oursView
+      : (this.conflictService.getResolutionContent(file, opt) ?? file.oursView);
+    this.resolvedContent.set(content);
+  }
+
+  private languageFromPath(filePath: string): string {
+    const ext = filePath.split('.').pop() ?? '';
+    const map: Record<string, string> = {
+      ts: 'typescript', js: 'javascript', py: 'python',
+      java: 'java', go: 'go', rb: 'ruby', rs: 'rust',
+      cs: 'csharp', cpp: 'cpp', c: 'c', json: 'json',
+      html: 'html', css: 'css', scss: 'scss', md: 'markdown',
+    };
+    return map[ext] ?? 'plaintext';
   }
 
   /** Create a worktree and apply the resolved content to it */

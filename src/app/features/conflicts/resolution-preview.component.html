@@ -31,11 +31,12 @@
 
       <!-- Monaco diff editor (before vs after) -->
       <div *ngIf="!isManual()" class="monaco-diff-wrap">
-        <ngx-monaco-editor
+        <ngx-monaco-diff-editor
           class="monaco-editor-full"
           [options]="diffEditorOptions"
-          [ngModel]="resolvedContent()">
-        </ngx-monaco-editor>
+          [originalModel]="originalModel()"
+          [modifiedModel]="modifiedModel()">
+        </ngx-monaco-diff-editor>
       </div>
 
       <!-- Monaco single editor for manual mode -->
@@ -43,7 +44,8 @@
         <ngx-monaco-editor
           class="monaco-editor-full"
           [options]="manualEditorOptions"
-          [(ngModel)]="resolvedContent">
+          [ngModel]="resolvedContent()"
+          (ngModelChange)="resolvedContent.set($event)">
         </ngx-monaco-editor>
       </div>
     </div>

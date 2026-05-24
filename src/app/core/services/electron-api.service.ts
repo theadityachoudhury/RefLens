@@ -126,6 +126,12 @@ export class ElectronApiService {
   cherryPick(repoPath: string, hashes: string[]): Observable<void> {
     return from(this.api.cherryPick(repoPath, hashes));
   }
+  continueCherryPick(repoPath: string): Observable<void> {
+    return from(this.api.continueCherryPick(repoPath));
+  }
+  skipCherryPick(repoPath: string): Observable<void> {
+    return from(this.api.skipCherryPick(repoPath));
+  }
   abortCherryPick(repoPath: string): Observable<void> {
     return from(this.api.abortCherryPick(repoPath));
   }

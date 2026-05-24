@@ -53,6 +53,8 @@ const electronAPI: ElectronAPI = {
 
   // Cherry-pick
   cherryPick: (r, hashes) => ipcRenderer.invoke('cherrypick:run', r, hashes),
+  continueCherryPick: (r) => ipcRenderer.invoke('cherrypick:continue', r),
+  skipCherryPick: (r) => ipcRenderer.invoke('cherrypick:skip', r),
   abortCherryPick: (r) => ipcRenderer.invoke('cherrypick:abort', r),
 };
 

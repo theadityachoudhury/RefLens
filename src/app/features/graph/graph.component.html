@@ -38,7 +38,7 @@
     <!-- Cherry-pick queue badge -->
     <div *ngIf="cherryPickQueue.length > 0" class="cherry-pick-badge">
       <span>{{ cherryPickQueue.length }} commit{{ cherryPickQueue.length > 1 ? 's' : '' }} queued</span>
-      <button class="btn btn--sm btn--primary" (click)="router.navigate(['/cherry-pick'])">Cherry-pick</button>
+      <button class="btn btn--sm btn--primary" (click)="navigateToCherryPick()">Cherry-pick</button>
       <button class="btn btn--sm btn--ghost" (click)="cherryPickQueue = []">Clear</button>
     </div>
   </div>

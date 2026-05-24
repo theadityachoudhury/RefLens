@@ -25,7 +25,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   commits: CommitNode[] = [];
   branches: BranchInfo[] = [];
   selectedCommit: CommitNode | null = null;
-  cherryPickQueue: string[] = [];
+  cherryPickQueue: CommitNode[] = [];
   loading = true;
 
   private destroy$ = new Subject<void>();
@@ -106,10 +106,14 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleCherryPick(commit: CommitNode): void {
-    const idx = this.cherryPickQueue.indexOf(commit.hash);
-    if (idx === -1) this.cherryPickQueue.push(commit.hash);
+    const idx = this.cherryPickQueue.findIndex((c) => c.hash === commit.hash);
+    if (idx === -1) this.cherryPickQueue.push(commit);
     else this.cherryPickQueue.splice(idx, 1);
     this.cdr.markForCheck();
+  }
+
+  navigateToCherryPick(): void {
+    this.router.navigate(['/cherry-pick'], { state: { queue: this.cherryPickQueue } });
   }
 
   checkoutBranch(name: string): void {

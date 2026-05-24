@@ -53,8 +53,13 @@ export class CherryPickComponent implements OnInit {
       },
       error: (err: Error) => {
         this.executing.set(false);
-        this.error.set(err.message ?? 'Cherry-pick failed');
         this.repoService.refreshStatus();
+        if (err.message === 'CHERRY_PICK_CONFLICT') {
+          // Git stopped mid-sequence due to a conflict — hand off to conflict resolution
+          this.router.navigate(['/conflicts']);
+        } else {
+          this.error.set(err.message ?? 'Cherry-pick failed');
+        }
       },
     });
   }

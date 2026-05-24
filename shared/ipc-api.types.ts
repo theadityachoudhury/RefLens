@@ -61,5 +61,7 @@ export interface ElectronAPI {
 
   // Cherry-pick
   cherryPick(repoPath: string, hashes: string[]): Promise<void>;
+  continueCherryPick(repoPath: string): Promise<void>;
+  skipCherryPick(repoPath: string): Promise<void>;
   abortCherryPick(repoPath: string): Promise<void>;
 }
