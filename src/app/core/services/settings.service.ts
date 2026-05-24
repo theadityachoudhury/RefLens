@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { ReplaySubject } from 'rxjs';
 import { ElectronApiService } from './electron-api.service';
 import { AppSettings, DEFAULT_SETTINGS } from '../../../../shared/settings.types';
 
@@ -31,6 +32,13 @@ export class SettingsService {
   readonly isWindows = computed(() => this._platform() === 'win32');
 
   private readonly _sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+  private readonly _ready$ = new ReplaySubject<void>(1);
+
+  /** Emits once (and replays to late subscribers) after the first IPC settings
+   *  response arrives. Code that must run with real persisted settings — such as
+   *  "restore last repo on startup" — should gate on this instead of reading
+   *  signals synchronously in ngOnInit, where DEFAULT_SETTINGS is still active. */
+  readonly ready$ = this._ready$.asObservable();
 
   readonly resolvedTheme = computed<'dark' | 'light'>(() => {
     const t = this._settings().theme;
@@ -42,6 +50,7 @@ export class SettingsService {
     this.api.getSettings().subscribe(s => {
       this._settings.set(s);
       this.applyToDOM(s);
+      this._ready$.next();
     });
 
     this.api.getPlatform().subscribe(p => this._platform.set(p));
