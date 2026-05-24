@@ -17,6 +17,12 @@ export interface RepoInfo {
   name: string;
 }
 
+export interface EditorInfo {
+  id: string;
+  name: string;
+  icon: string; // base64 PNG data URL from the system app icon
+}
+
 /** The typed API exposed on window.electronAPI via contextBridge */
 export interface ElectronAPI {
   // Repository
@@ -64,4 +70,11 @@ export interface ElectronAPI {
   continueCherryPick(repoPath: string): Promise<void>;
   skipCherryPick(repoPath: string): Promise<void>;
   abortCherryPick(repoPath: string): Promise<void>;
+
+  // Window management
+  openNewWindow(): Promise<void>;
+
+  // Editor integration
+  getAvailableEditors(): Promise<EditorInfo[]>;
+  openInEditor(repoPath: string, editorId: string): Promise<void>;
 }

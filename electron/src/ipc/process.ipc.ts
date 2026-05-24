@@ -2,19 +2,23 @@ import { BrowserWindow, ipcMain } from 'electron';
 import { spawn, ChildProcess } from 'child_process';
 import type { ProcessOutput } from '../../../shared/git.types';
 
+// Keyed by `${windowId}:${processId}` to isolate processes per window
 const runningProcesses = new Map<string, ChildProcess>();
 
-export function registerProcessHandlers(win: BrowserWindow): void {
-  ipcMain.handle('process:spawn', async (_, command: string, cwd: string, id: string) => {
-    // Kill any existing process with this id
-    runningProcesses.get(id)?.kill();
-    runningProcesses.delete(id);
+export function registerProcessHandlers(): void {
+  ipcMain.handle('process:spawn', async (event, command: string, cwd: string, id: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) return;
+    const key = `${win.id}:${id}`;
+
+    runningProcesses.get(key)?.kill();
+    runningProcesses.delete(key);
 
     const proc = spawn(command, [], { cwd, shell: true });
-    runningProcesses.set(id, proc);
+    runningProcesses.set(key, proc);
 
     const send = (data: ProcessOutput) => {
-      if (!win.isDestroyed()) win.webContents.send(`process:output:${id}`, data);
+      if (!event.sender.isDestroyed()) event.sender.send(`process:output:${id}`, data);
     };
 
     proc.stdout.on('data', (d: Buffer) =>
@@ -25,12 +29,15 @@ export function registerProcessHandlers(win: BrowserWindow): void {
     );
     proc.on('close', (code) => {
       send({ stdout: '', stderr: '', exitCode: code ?? -1 });
-      runningProcesses.delete(id);
+      runningProcesses.delete(key);
     });
   });
 
-  ipcMain.handle('process:kill', async (_, id: string) => {
-    runningProcesses.get(id)?.kill();
-    runningProcesses.delete(id);
+  ipcMain.handle('process:kill', async (event, id: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) return;
+    const key = `${win.id}:${id}`;
+    runningProcesses.get(key)?.kill();
+    runningProcesses.delete(key);
   });
 }

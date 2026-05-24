@@ -1,14 +1,14 @@
-import { app, BrowserWindow, dialog } from "electron";
+import { app, BrowserWindow, dialog, Menu } from "electron";
 import path from "path";
 import { config } from "dotenv";
-import { registerAllHandlers } from "./ipc/index";
+import { registerGlobalHandlers } from "./ipc/index";
 
 config({ path: path.join(__dirname, "../../../.env") });
 
 const isDev = process.env["NODE_ENV"] === "development";
 const wantDeveloperToolsToOpen = process.env["OPEN_DEV_TOOLS"] === "true";
 
-function createWindow(): BrowserWindow {
+export function createWindow(): BrowserWindow {
 	const win = new BrowserWindow({
 		width: 1440,
 		height: 900,
@@ -35,7 +35,7 @@ function createWindow(): BrowserWindow {
 			win.webContents.openDevTools({ mode: "detach" });
 		}
 	} else {
-		win.loadFile(path.join(__dirname, "../../../dist/index.html"));
+		win.loadFile(path.join(__dirname, "../../../dist/browser/index.html"));
 	}
 
 	win.webContents.on("will-navigate", (event, url) => {
@@ -47,17 +47,43 @@ function createWindow(): BrowserWindow {
 	return win;
 }
 
-let mainWindow: BrowserWindow | null = null;
-
 app.whenReady().then(() => {
-	mainWindow = createWindow();
-	registerAllHandlers(mainWindow);
+	// Register IPC channels once — handlers use event.sender to route per-window
+	registerGlobalHandlers(createWindow);
+	createWindow();
+
+	const menu = Menu.buildFromTemplate([
+		{
+			label: app.name,
+			submenu: [{ role: "about" }, { type: "separator" }, { role: "quit" }],
+		},
+		{
+			label: "File",
+			submenu: [
+				{
+					label: "New Window",
+					accelerator: "CmdOrCtrl+N",
+					click: () => createWindow(),
+				},
+			],
+		},
+		{
+			label: "Edit",
+			submenu: [
+				{ role: "undo" },
+				{ role: "redo" },
+				{ type: "separator" },
+				{ role: "cut" },
+				{ role: "copy" },
+				{ role: "paste" },
+				{ role: "selectAll" },
+			],
+		},
+	]);
+	Menu.setApplicationMenu(menu);
 
 	app.on("activate", () => {
-		if (BrowserWindow.getAllWindows().length === 0) {
-			mainWindow = createWindow();
-			registerAllHandlers(mainWindow);
-		}
+		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});
 });
 

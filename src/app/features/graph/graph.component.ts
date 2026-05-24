@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
+import { RefreshService } from '../../core/services/refresh.service';
 import { CanvasRendererService } from './canvas-renderer.service';
 import { CommitGraph } from '../../../../shared/commit-graph';
 import type { CommitNode, BranchInfo, DiffFile } from '../../../../shared/git.types';
@@ -42,6 +43,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     public router: Router,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
+    private refreshService: RefreshService,
   ) {}
 
   get repoPath(): string {
@@ -57,6 +59,9 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigate(['/conflicts']);
       }
     });
+
+    this.refreshService.refresh$.pipe(takeUntil(this.destroy$)).subscribe(() => this.refreshGraph());
+
 
     this.renderer.commitClick$.pipe(takeUntil(this.destroy$)).subscribe(({ commit, ctrlOrCmd }) => {
       if (ctrlOrCmd) {

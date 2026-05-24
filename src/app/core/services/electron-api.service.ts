@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, fromEventPattern } from 'rxjs';
-import type { ElectronAPI, RepoInfo } from '../../../../shared/ipc-api.types';
+import type { ElectronAPI, EditorInfo, RepoInfo } from '../../../../shared/ipc-api.types';
 import type {
   BranchInfo,
   CommitNode,
@@ -134,5 +134,18 @@ export class ElectronApiService {
   }
   abortCherryPick(repoPath: string): Observable<void> {
     return from(this.api.abortCherryPick(repoPath));
+  }
+
+  // Window management
+  openNewWindow(): Observable<void> {
+    return from(this.api.openNewWindow());
+  }
+
+  // Editor integration
+  getAvailableEditors(): Observable<EditorInfo[]> {
+    return from(this.api.getAvailableEditors());
+  }
+  openInEditor(repoPath: string, editorId: string): Observable<void> {
+    return from(this.api.openInEditor(repoPath, editorId));
   }
 }

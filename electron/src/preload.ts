@@ -56,6 +56,13 @@ const electronAPI: ElectronAPI = {
   continueCherryPick: (r) => ipcRenderer.invoke('cherrypick:continue', r),
   skipCherryPick: (r) => ipcRenderer.invoke('cherrypick:skip', r),
   abortCherryPick: (r) => ipcRenderer.invoke('cherrypick:abort', r),
+
+  // Window management
+  openNewWindow: () => ipcRenderer.invoke('window:new'),
+
+  // Editor integration
+  getAvailableEditors: () => ipcRenderer.invoke('editor:getAll'),
+  openInEditor: (repoPath, editorId) => ipcRenderer.invoke('editor:open', repoPath, editorId),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
