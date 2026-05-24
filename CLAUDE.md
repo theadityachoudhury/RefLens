@@ -97,6 +97,14 @@ Monaco editor is loaded from `dist/assets/vs/` (copied from `node_modules/monaco
 
 `electron/src/editors/editor.detector.ts` detects 10 editors via platform-specific candidate paths. On macOS, it extracts the app icon via `sips` + `plutil` (`.icns` → 48px PNG base64) to work around Electron's dark-mode template icon issue. Results are cached after first detection. `openInEditor` uses `open -a` on macOS, direct `spawn` on Windows/Linux.
 
+## Settings System
+
+`shared/settings.types.ts` defines `AppSettings` and `DEFAULT_SETTINGS`. Settings are persisted in electron-store (`settings.json`, separate from the repos store) and accessed via `settings:get`, `settings:set`, `settings:reset` IPC channels. Main-process handlers that need settings (worktree path, rebase depth, recent repos limit) import `readSettings()` from `electron/src/settings/settings.store.ts`.
+
+`src/app/core/services/settings.service.ts` is the Angular service: it holds a `signal<AppSettings>()`, exposes computed selectors (`rowHeight`, `monacoTheme`, `refreshInterval`, etc.), and calls `applyToDOM()` when settings change — which sets `body.theme-light`, `body.accent-*`, and `body.font-*` CSS classes, and calls `monaco.editor.setTheme()` globally.
+
+**Theme system:** All colors are CSS custom properties defined on `:root` (dark defaults) and overridden under `body.theme-light`. Accent colors override `--accent` and `--accent-subtle` via `body.accent-purple/green/teal/pink`. Route `/settings` (no guard) navigates to the tabbed settings page; the gear icon button in the titlebar links to it.
+
 ## Environment
 
 `.env` at repo root is loaded by `dotenv` in `main.ts`. The path resolves three levels up from `dist-electron/electron/src/`.
