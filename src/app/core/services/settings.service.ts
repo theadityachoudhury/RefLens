@@ -32,6 +32,9 @@ export class SettingsService {
   readonly isWindows = computed(() => this._platform() === 'win32');
 
   private readonly _sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+  // Signal-backed mirror of the media query so computed selectors that depend
+  // on it (resolvedTheme, monacoTheme) are invalidated when the OS theme changes.
+  private readonly _sysDarkMatches = signal(this._sysDark.matches);
   private readonly _ready$ = new ReplaySubject<void>(1);
 
   /** Emits once (and replays to late subscribers) after the first IPC settings
@@ -43,7 +46,7 @@ export class SettingsService {
   readonly resolvedTheme = computed<'dark' | 'light'>(() => {
     const t = this._settings().theme;
     if (t !== 'system') return t;
-    return this._sysDark.matches ? 'dark' : 'light';
+    return this._sysDarkMatches() ? 'dark' : 'light';
   });
 
   constructor() {
@@ -55,7 +58,10 @@ export class SettingsService {
 
     this.api.getPlatform().subscribe(p => this._platform.set(p));
 
-    this._sysDark.addEventListener('change', () => this.applyToDOM(this._settings()));
+    this._sysDark.addEventListener('change', (e: MediaQueryListEvent) => {
+      this._sysDarkMatches.set(e.matches);  // invalidates resolvedTheme + monacoTheme
+      this.applyToDOM(this._settings());
+    });
   }
 
   get snapshot(): AppSettings {
@@ -78,7 +84,7 @@ export class SettingsService {
 
   private applyToDOM(s: AppSettings): void {
     const isDark = s.theme === 'dark' ||
-      (s.theme === 'system' && this._sysDark.matches);
+      (s.theme === 'system' && this._sysDarkMatches());
 
     document.body.classList.toggle('theme-light', !isDark);
 
