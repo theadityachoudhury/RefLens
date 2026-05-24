@@ -9,6 +9,7 @@ import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { RefreshService } from '../../core/services/refresh.service';
 import { SettingsService } from '../../core/services/settings.service';
+import { ShortcutService } from '../../core/services/shortcut.service';
 import { CanvasRendererService } from './canvas-renderer.service';
 import { CommitGraph } from '../../../../shared/commit-graph';
 import type { CommitNode, BranchInfo, DiffFile } from '../../../../shared/git.types';
@@ -46,6 +47,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     private ngZone: NgZone,
     private refreshService: RefreshService,
     private settingsService: SettingsService,
+    private shortcutService: ShortcutService,
   ) {}
 
   get repoPath(): string {
@@ -63,6 +65,13 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.refreshService.refresh$.pipe(takeUntil(this.destroy$)).subscribe(() => this.refreshGraph());
+
+    // Escape: close detail panel if open, otherwise handled by AppComponent
+    this.shortcutService.goBack$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.selectedCommit) {
+        this.closeDetail();
+      }
+    });
 
 
     this.renderer.commitClick$.pipe(takeUntil(this.destroy$)).subscribe(({ commit, ctrlOrCmd }) => {
