@@ -1,33 +1,137 @@
 *, *::before, *::after { box-sizing: border-box; }
 
+/* ─── Design tokens (dark theme default) ─────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg-canvas:  #0d1117;
+  --bg-overlay: #161b22;
+  --bg-surface: #21262d;
+  --bg-input:   #30363d;
+
+  /* Text */
+  --text-primary:   #e6edf3;
+  --text-secondary: #c9d1d9;
+  --text-muted:     #8b949e;
+  --text-subtle:    #6e7681;
+
+  /* Borders */
+  --border-default: #21262d;
+  --border-muted:   #30363d;
+  --border-subtle:  #484f58;
+
+  /* Accent — user-selectable (blue default) */
+  --accent:        #58a6ff;
+  --accent-subtle: rgba(88, 166, 255, 0.15);
+
+  /* Semantic colours */
+  --green:              #3fb950;
+  --green-action:       #238636;
+  --green-action-hover: #2ea043;
+  --green-subtle:       rgba(63, 185, 80, 0.15);
+  --red:                #f78166;
+  --red-subtle:         rgba(247, 129, 102, 0.15);
+  --danger:             #f85149;
+  --danger-subtle:      rgba(248, 81, 73, 0.15);
+  --purple:             #d2a8ff;
+  --orange:             #ffa657;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #30363d;
+  --scrollbar-hover: #484f58;
+
+  /* Monaco diff decorations */
+  --hunk-ours-bg:     rgba(247, 129, 102, 0.15);
+  --hunk-ours-border: rgba(247, 129, 102, 0.7);
+  --hunk-theirs-bg:     rgba(63, 185, 80, 0.15);
+  --hunk-theirs-border: rgba(63, 185, 80, 0.7);
+}
+
+/* ─── Light theme override ────────────────────────────────────────────────── */
+body.theme-light {
+  --bg-canvas:  #ffffff;
+  --bg-overlay: #f6f8fa;
+  --bg-surface: #eaeef2;
+  --bg-input:   #d0d7de;
+
+  --text-primary:   #1f2328;
+  --text-secondary: #656d76;
+  --text-muted:     #636c76;
+  --text-subtle:    #6e7781;
+
+  --border-default: #d0d7de;
+  --border-muted:   #d8dee4;
+  --border-subtle:  #bdc4cb;
+
+  --accent:        #0969da;
+  --accent-subtle: rgba(9, 105, 218, 0.12);
+
+  --green:              #1a7f37;
+  --green-action:       #1f883d;
+  --green-action-hover: #2c974b;
+  --green-subtle:       rgba(26, 127, 55, 0.12);
+  --red:                #d1242f;
+  --red-subtle:         rgba(209, 36, 47, 0.12);
+  --danger:             #cf222e;
+  --danger-subtle:      rgba(207, 34, 46, 0.12);
+  --purple:             #8250df;
+  --orange:             #bc4c00;
+
+  --scrollbar-thumb: #d0d7de;
+  --scrollbar-hover: #bdc4cb;
+
+  --hunk-ours-bg:     rgba(207, 34, 46, 0.1);
+  --hunk-ours-border: rgba(207, 34, 46, 0.6);
+  --hunk-theirs-bg:     rgba(26, 127, 55, 0.1);
+  --hunk-theirs-border: rgba(26, 127, 55, 0.6);
+}
+
+/* ─── Accent colour overrides ────────────────────────────────────────────── */
+body.accent-purple { --accent: #d2a8ff; --accent-subtle: rgba(210, 168, 255, 0.15); }
+body.accent-green  { --accent: #3fb950; --accent-subtle: rgba(63, 185, 80, 0.15); }
+body.accent-teal   { --accent: #4fc1e9; --accent-subtle: rgba(79, 193, 233, 0.15); }
+body.accent-pink   { --accent: #ff7b9c; --accent-subtle: rgba(255, 123, 156, 0.15); }
+
+/* Light theme accent overrides */
+body.theme-light.accent-purple { --accent: #8250df; --accent-subtle: rgba(130, 80, 223, 0.12); }
+body.theme-light.accent-green  { --accent: #1a7f37; --accent-subtle: rgba(26, 127, 55, 0.12); }
+body.theme-light.accent-teal   { --accent: #0598bc; --accent-subtle: rgba(5, 152, 188, 0.12); }
+body.theme-light.accent-pink   { --accent: #bf3b7b; --accent-subtle: rgba(191, 59, 123, 0.12); }
+
+/* ─── UI font size overrides ─────────────────────────────────────────────── */
+body.font-small  { font-size: 13px; }
+body.font-medium { font-size: 14px; }
+body.font-large  { font-size: 16px; }
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: #0d1117;
-  color: #e6edf3;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar theming */
+/* ─── Scrollbar theming ───────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #484f58; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
 
-/* Monaco diff decorations (global, can't be scoped) */
+/* ─── Monaco diff decorations (global — cannot be scoped) ────────────────── */
 .hunk-ours {
-  background: rgba(247, 129, 102, 0.15) !important;
-  border-left: 3px solid rgba(247, 129, 102, 0.7) !important;
+  background: var(--hunk-ours-bg) !important;
+  border-left: 3px solid var(--hunk-ours-border) !important;
 }
 .hunk-theirs {
-  background: rgba(63, 185, 80, 0.15) !important;
-  border-left: 3px solid rgba(63, 185, 80, 0.7) !important;
+  background: var(--hunk-theirs-bg) !important;
+  border-left: 3px solid var(--hunk-theirs-border) !important;
 }
 
-/* Icon utility — uses CSS mask so icons inherit currentColor from their parent */
+/* ─── Icon utility — CSS mask, inherits currentColor ─────────────────────── */
 .icon {
   display: inline-block;
   flex-shrink: 0;
@@ -39,13 +143,14 @@ html, body {
 .icon-chevron-down { width: 8px;  height: 5px;  -webkit-mask-image: url('assets/icons/chevron-down.svg'); }
 .icon-new-window   { width: 12px; height: 12px; -webkit-mask-image: url('assets/icons/new-window.svg');   }
 .icon-refresh      { width: 14px; height: 14px; -webkit-mask-image: url('assets/icons/refresh.svg');      }
+.icon-settings     { width: 14px; height: 14px; -webkit-mask-image: url('assets/icons/settings.svg');     }
 
-/* Shared titlebar button — used by all titlebar components */
+/* ─── Shared titlebar button ─────────────────────────────────────────────── */
 .titlebar-btn {
   background: transparent;
-  border: 1px solid #30363d;
+  border: 1px solid var(--border-muted);
   border-radius: 5px;
-  color: #8b949e;
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -56,13 +161,13 @@ html, body {
   font-family: inherit;
   transition: color 0.12s, border-color 0.12s;
 
-  &:hover { color: #e6edf3; border-color: #8b949e; }
+  &:hover { color: var(--text-primary); border-color: var(--text-muted); }
   &--icon { width: 26px; padding: 0; justify-content: center; }
 }
 
-/* CDK drag-drop placeholder */
+/* ─── CDK drag-drop ──────────────────────────────────────────────────────── */
 .cdk-drag-preview {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   opacity: 0.85;
 }
 .cdk-drag-animating { transition: transform 200ms cubic-bezier(0, 0, 0.2, 1); }

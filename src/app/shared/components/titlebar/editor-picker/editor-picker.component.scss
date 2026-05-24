@@ -11,8 +11,8 @@
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  background: #161b22;
-  border: 1px solid #30363d;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-muted);
   border-radius: 8px;
   padding: 0.3rem;
   min-width: 180px;
@@ -27,7 +27,7 @@
     background: transparent;
     border: none;
     border-radius: 5px;
-    color: #c9d1d9;
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 0.8125rem;
     font-family: inherit;
@@ -35,9 +35,9 @@
     text-align: left;
     transition: background 0.1s;
 
-    &:hover { background: #21262d; color: #e6edf3; }
+    &:hover { background: var(--bg-surface); color: var(--text-primary); }
 
-    &--active { color: #e6edf3; }
+    &--active { color: var(--text-primary); }
 
     .editor-menu-icon {
       width: 24px;
@@ -53,7 +53,7 @@
 
   &__check {
     font-size: 0.75rem;
-    color: #3fb950;
+    color: var(--green);
     margin-left: auto;
   }
 
@@ -62,11 +62,11 @@
     height: 24px;
     flex-shrink: 0;
     border-radius: 5px;
-    background: #30363d;
+    background: var(--bg-input);
   }
 
   &__no-editors {
-    color: #e6edf3;
+    color: var(--text-primary);
     font-size: 0.8125rem;
     padding: 0.35rem 0.5rem 0.1rem;
     margin: 0;
@@ -74,7 +74,7 @@
   }
 
   &__hint {
-    color: #6e7681;
+    color: var(--text-subtle);
     font-size: 0.75rem;
     padding: 0 0.5rem 0.35rem;
     margin: 0;
