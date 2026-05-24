@@ -26,10 +26,12 @@ const SHORTCUT_ROWS: ShortcutRow[] = [
   { action: 'goBack',       label: 'Go Back / Close', hint: 'Close detail panel or navigate to previous page' },
 ];
 
+// Cherry-pick queue is excluded from FIXED_ROWS because its modifier key
+// is user-configurable (cherryPickModifier setting). It is derived at runtime
+// via cherryPickFixedRow computed on the component class.
 const FIXED_ROWS: FixedRow[] = [
-  { label: 'Cherry-pick queue', binding: 'Ctrl / ⌘ + Click', hint: 'Toggle a commit into the cherry-pick queue (mouse)' },
-  { label: 'Run command',       combo:   'enter',              hint: 'Execute the run command in the worktree preview' },
-  { label: 'New Window',        combo:   'mod+n',              hint: 'Open a new application window (system menu)' },
+  { label: 'Run command', combo: 'enter', hint: 'Execute the run command in the worktree preview' },
+  { label: 'New Window',  combo: 'mod+n', hint: 'Open a new application window (system menu)' },
 ];
 
 @Component({
@@ -113,6 +115,17 @@ const FIXED_ROWS: FixedRow[] = [
       <p class="fixed-note">These bindings are built into the system and cannot be changed.</p>
 
       <div class="shortcuts-table">
+        <!-- Cherry-pick row: derived from cherryPickModifier + platform -->
+        <div class="shortcut-row">
+          <div class="shortcut-row__info">
+            <span class="shortcut-row__label">Cherry-pick queue</span>
+            <span class="shortcut-row__hint">Toggle a commit into the cherry-pick queue (mouse)</span>
+          </div>
+          <div class="shortcut-row__binding">
+            <kbd class="key-badge key-badge--fixed key-badge--wide">{{ cherryPickBinding() }}</kbd>
+          </div>
+        </div>
+
         @for (row of fixedRows; track row.label) {
           <div class="shortcut-row">
             <div class="shortcut-row__info">
@@ -289,6 +302,15 @@ export class SettingsKeyboardTabComponent {
   parts(combo: string): string[] {
     return displayParts(combo, this.s.isMac());
   }
+
+  /** Derives the cherry-pick mouse-combo label from the current modifier
+   *  setting and platform, so it stays correct when the user changes the modifier. */
+  protected readonly cherryPickBinding = computed(() => {
+    const isMac = this.s.isMac();
+    const modifier = this.s.snapshot.cherryPickModifier;
+    if (modifier === 'alt') return isMac ? '⌥ + Click' : 'Alt + Click';
+    return isMac ? '⌘ + Click' : 'Ctrl + Click';
+  });
 
   startEdit(action: keyof ShortcutMap): void {
     this.pendingCombo.set('');
