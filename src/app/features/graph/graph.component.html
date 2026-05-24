@@ -1,4 +1,4 @@
-<div class="graph-layout">
+<div class="graph-layout" [class.graph-layout--with-detail]="selectedCommit">
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar__repo">
@@ -32,7 +32,7 @@
       <div class="spinner"></div>
     </div>
 
-    <svg #svgEl class="graph-svg" [style.display]="loading ? 'none' : 'block'"></svg>
+    <canvas #canvasEl class="graph-canvas" [style.display]="loading ? 'none' : 'block'"></canvas>
 
     <!-- Cherry-pick queue badge -->
     <div *ngIf="cherryPickQueue.length > 0" class="cherry-pick-badge">

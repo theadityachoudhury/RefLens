@@ -4,25 +4,26 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject, takeUntil, switchMap, combineLatest } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
-import { GraphRendererService } from './graph-renderer.service';
+import { CanvasRendererService } from './canvas-renderer.service';
+import { CommitGraph } from '../../../../shared/commit-graph';
 import type { CommitNode, BranchInfo } from '../../../../shared/git.types';
 
 @Component({
   selector: 'rl-graph',
   standalone: true,
   imports: [CommonModule],
-  providers: [GraphRendererService],
+  providers: [CanvasRendererService],
   templateUrl: './graph.component.html',
   styleUrl: './graph.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('svgEl') svgRef!: ElementRef<SVGSVGElement>;
+  @ViewChild('canvasEl') canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  commits: CommitNode[] = [];
+  graph: CommitGraph | null = null;
   branches: BranchInfo[] = [];
   selectedCommit: CommitNode | null = null;
   cherryPickQueue: CommitNode[] = [];
@@ -34,7 +35,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private api: ElectronApiService,
     public repoService: RepositoryService,
-    public renderer: GraphRendererService,
+    public renderer: CanvasRendererService,
     public router: Router,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
@@ -48,14 +49,12 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadGraph();
     this.loadBranches();
 
-    // Navigate to conflicts if repo enters conflicted state
     this.repoService.status$.pipe(takeUntil(this.destroy$)).subscribe((status) => {
       if (status?.conflicted.length && (status.isMerging || status.isCherryPicking)) {
         this.router.navigate(['/conflicts']);
       }
     });
 
-    // Respond to commit clicks from D3
     this.renderer.commitClick$.pipe(takeUntil(this.destroy$)).subscribe(({ commit, ctrlOrCmd }) => {
       if (ctrlOrCmd) {
         this.toggleCherryPick(commit);
@@ -66,24 +65,23 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.renderer.initialize(this.svgRef.nativeElement);
+    this.renderer.initialize(this.canvasRef.nativeElement);
 
     this.resizeObserver = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
       this.renderer.setViewportSize(width, height);
     });
-    this.resizeObserver.observe(this.svgRef.nativeElement);
+    this.resizeObserver.observe(this.canvasRef.nativeElement);
   }
 
   private loadGraph(): void {
     this.loading = true;
     this.api.getCommitGraph(this.repoPath, { maxCount: 500, allBranches: true }).subscribe({
       next: (commits) => {
-        this.commits = commits;
+        this.graph = CommitGraph.from(commits);
         this.loading = false;
         this.cdr.markForCheck();
-        // Render after view update
-        setTimeout(() => this.renderer.render(commits, this.selectedCommit?.hash ?? null));
+        setTimeout(() => this.renderer.render(this.graph!, this.selectedCommit?.hash ?? null));
       },
       error: () => {
         this.loading = false;
