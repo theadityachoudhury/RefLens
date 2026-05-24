@@ -11,6 +11,31 @@
   -webkit-app-region: drag;
   background: #0d1117;
   border-bottom: 1px solid #21262d;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.75rem;
+
+  &__new-window {
+    -webkit-app-region: no-drag;
+    background: transparent;
+    border: 1px solid #30363d;
+    border-radius: 5px;
+    color: #8b949e;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 22px;
+    padding: 0;
+    transition: color 0.12s, border-color 0.12s;
+
+    &:hover {
+      color: #e6edf3;
+      border-color: #8b949e;
+    }
+  }
 }
 
 .content {

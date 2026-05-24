@@ -23,6 +23,7 @@ export class RepositoryService implements OnDestroy {
   readonly loading$ = this._loading.asObservable();
 
   private statusSub: Subscription | null = null;
+  private statusChangedSub: Subscription | null = null;
 
   constructor(private api: ElectronApiService) {}
 
@@ -53,13 +54,14 @@ export class RepositoryService implements OnDestroy {
 
   private startStatusPolling(repoPath: string): void {
     this.statusSub?.unsubscribe();
-    // Poll every 3 seconds; also listen for file-watch push events
+    this.statusChangedSub?.unsubscribe();
+
     this.statusSub = timer(0, 3000)
       .pipe(switchMap(() => this.api.getRepositoryStatus(repoPath)))
       .subscribe((status) => this._status.next(status));
 
-    // Push-based updates from main process (git index / HEAD file watcher)
-    this.api.onStatusChanged().subscribe((status) => this._status.next(status));
+    this.statusChangedSub = this.api.onStatusChanged()
+      .subscribe((status) => this._status.next(status));
   }
 
   refreshStatus(): void {
@@ -70,5 +72,6 @@ export class RepositoryService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.statusSub?.unsubscribe();
+    this.statusChangedSub?.unsubscribe();
   }
 }

@@ -64,4 +64,7 @@ export interface ElectronAPI {
   continueCherryPick(repoPath: string): Promise<void>;
   skipCherryPick(repoPath: string): Promise<void>;
   abortCherryPick(repoPath: string): Promise<void>;
+
+  // Window management
+  openNewWindow(): Promise<void>;
 }

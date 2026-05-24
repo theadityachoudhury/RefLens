@@ -135,4 +135,9 @@ export class ElectronApiService {
   abortCherryPick(repoPath: string): Observable<void> {
     return from(this.api.abortCherryPick(repoPath));
   }
+
+  // Window management
+  openNewWindow(): Observable<void> {
+    return from(this.api.openNewWindow());
+  }
 }
