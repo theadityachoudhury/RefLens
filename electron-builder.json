@@ -8,7 +8,7 @@
     "buildResources": "build-resources"
   },
   "files": [
-    "dist/**/*",
+    "dist/browser/**/*",
     "dist-electron/**/*",
     "!dist-electron/**/*.d.ts",
     "!dist-electron/**/*.js.map",

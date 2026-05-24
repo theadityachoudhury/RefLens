@@ -35,7 +35,7 @@ export function createWindow(): BrowserWindow {
 			win.webContents.openDevTools({ mode: "detach" });
 		}
 	} else {
-		win.loadFile(path.join(__dirname, "../../../dist/index.html"));
+		win.loadFile(path.join(__dirname, "../../../dist/browser/index.html"));
 	}
 
 	win.webContents.on("will-navigate", (event, url) => {
