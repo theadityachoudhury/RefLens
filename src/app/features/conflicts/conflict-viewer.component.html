@@ -1,0 +1,78 @@
+<div class="conflict-viewer" *ngIf="file() as f; else loading">
+  <!-- Header -->
+  <header class="cv-header">
+    <button class="btn btn--ghost btn--sm" (click)="goBack()">← Back</button>
+    <div class="cv-header__file">
+      <span class="cv-header__path">{{ f.path }}</span>
+      <span class="cv-header__hunks">{{ f.hunks.length }} conflict region{{ f.hunks.length !== 1 ? 's' : '' }}</span>
+    </div>
+    <div class="cv-header__legend">
+      <span class="legend-item legend-item--red">Current changes</span>
+      <span class="legend-item legend-item--green">Incoming changes</span>
+    </div>
+  </header>
+
+  <!-- Side-by-side editors -->
+  <div class="cv-editors">
+    <div class="cv-editor-pane">
+      <div class="cv-editor-pane__label cv-editor-pane__label--ours">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/></svg>
+        CURRENT (HEAD)
+      </div>
+      <ngx-monaco-editor
+        class="monaco-editor"
+        [options]="editorOptions"
+        [ngModel]="f.oursView"
+        (onInit)="onOursEditorInit($event)">
+      </ngx-monaco-editor>
+    </div>
+
+    <div class="cv-editor-divider"></div>
+
+    <div class="cv-editor-pane">
+      <div class="cv-editor-pane__label cv-editor-pane__label--theirs">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/></svg>
+        INCOMING
+      </div>
+      <ngx-monaco-editor
+        class="monaco-editor"
+        [options]="editorOptions"
+        [ngModel]="f.theirsView"
+        (onInit)="onTheirsEditorInit($event)">
+      </ngx-monaco-editor>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <footer class="cv-actions">
+    <div class="cv-actions__label">Choose a resolution:</div>
+    <div class="cv-actions__buttons">
+      <button class="action-btn action-btn--current" (click)="selectOption('acceptCurrent')">
+        <span class="action-btn__dot action-btn__dot--red"></span>
+        Accept Current Change
+      </button>
+      <button class="action-btn action-btn--incoming" (click)="selectOption('acceptIncoming')">
+        <span class="action-btn__dot action-btn__dot--green"></span>
+        Accept Incoming Change
+      </button>
+      <button class="action-btn action-btn--both" (click)="selectOption('acceptBoth')">
+        <span class="action-btn__dot action-btn__dot--red"></span>
+        <span class="action-btn__dot action-btn__dot--green"></span>
+        Accept Both Changes
+      </button>
+      <button class="action-btn action-btn--manual" (click)="editManually()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Z"/>
+        </svg>
+        Edit Manually
+      </button>
+    </div>
+  </footer>
+</div>
+
+<ng-template #loading>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <span>Loading file…</span>
+  </div>
+</ng-template>
