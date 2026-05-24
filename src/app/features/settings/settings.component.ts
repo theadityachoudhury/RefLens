@@ -7,8 +7,9 @@ import { SettingsEditorTabComponent } from './tabs/editor-tab.component';
 import { SettingsGitTabComponent } from './tabs/git-tab.component';
 import { SettingsApplicationTabComponent } from './tabs/application-tab.component';
 import { SettingsKeyboardTabComponent } from './tabs/keyboard-tab.component';
+import { SettingsAboutTabComponent } from './tabs/about-tab.component';
 
-type SettingsTab = 'appearance' | 'graph' | 'editor' | 'git' | 'application' | 'keyboard';
+type SettingsTab = 'appearance' | 'graph' | 'editor' | 'git' | 'application' | 'keyboard' | 'about';
 
 const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'appearance',  label: 'Appearance'  },
@@ -17,6 +18,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'git',         label: 'Git'         },
   { id: 'application', label: 'Application' },
   { id: 'keyboard',    label: 'Keyboard'    },
+  { id: 'about',       label: 'About'       },
 ];
 
 @Component({
@@ -31,6 +33,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
     SettingsGitTabComponent,
     SettingsApplicationTabComponent,
     SettingsKeyboardTabComponent,
+    SettingsAboutTabComponent,
   ],
   template: `
     <div class="settings-page">
@@ -61,6 +64,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
             @case ('git')         { <rl-settings-git-tab         /> }
             @case ('application') { <rl-settings-application-tab /> }
             @case ('keyboard')    { <rl-settings-keyboard-tab    /> }
+            @case ('about')       { <rl-settings-about-tab       /> }
           }
         </div>
       </div>

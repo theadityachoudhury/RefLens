@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, app, shell } from 'electron';
 import path from 'path';
 import { getSettingsStore, platformDefaultShortcuts } from '../settings/settings.store';
 import { DEFAULT_SETTINGS } from '../../../shared/settings.types';
@@ -165,4 +165,11 @@ export function registerSettingsHandlers(): void {
   });
 
   ipcMain.handle('system:platform', () => process.platform);
+  ipcMain.handle('system:version', () => app.getVersion());
+  ipcMain.handle('system:openExternal', (_, url: unknown) => {
+    if (typeof url === 'string' && /^https?:\/\//.test(url)) {
+      return shell.openExternal(url);
+    }
+    return Promise.resolve();
+  });
 }

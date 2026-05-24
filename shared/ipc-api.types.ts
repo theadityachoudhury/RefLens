@@ -94,6 +94,8 @@ export interface ElectronAPI {
 
   // System
   getPlatform(): Promise<string>;
+  getAppVersion(): Promise<string>;
+  openExternal(url: string): Promise<void>;
 
   // Updates
   checkForUpdate(): Promise<void>;

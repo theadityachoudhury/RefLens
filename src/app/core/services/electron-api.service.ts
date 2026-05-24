@@ -165,6 +165,12 @@ export class ElectronApiService {
   getPlatform(): Observable<string> {
     return from(this.api.getPlatform());
   }
+  getAppVersion(): Observable<string> {
+    return from(this.api.getAppVersion());
+  }
+  openExternal(url: string): Observable<void> {
+    return from(this.api.openExternal(url));
+  }
 
   // Updates
   checkForUpdate(): Observable<void> {
