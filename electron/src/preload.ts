@@ -59,6 +59,10 @@ const electronAPI: ElectronAPI = {
 
   // Window management
   openNewWindow: () => ipcRenderer.invoke('window:new'),
+
+  // Editor integration
+  getAvailableEditors: () => ipcRenderer.invoke('editor:getAll'),
+  openInEditor: (repoPath, editorId) => ipcRenderer.invoke('editor:open', repoPath, editorId),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

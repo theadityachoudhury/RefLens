@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil, switchMap, combineLatest } from 'rxjs';
 import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
+import { RefreshService } from '../../core/services/refresh.service';
 import { GraphRendererService } from './graph-renderer.service';
 import type { CommitNode, BranchInfo } from '../../../../shared/git.types';
 
@@ -38,6 +39,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     public router: Router,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
+    private refreshService: RefreshService,
   ) {}
 
   get repoPath(): string {
@@ -54,6 +56,8 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigate(['/conflicts']);
       }
     });
+
+    this.refreshService.refresh$.pipe(takeUntil(this.destroy$)).subscribe(() => this.refreshGraph());
 
     // Respond to commit clicks from D3
     this.renderer.commitClick$.pipe(takeUntil(this.destroy$)).subscribe(({ commit, ctrlOrCmd }) => {
