@@ -1,0 +1,31 @@
+<div class="cherry-pick-page">
+  <header class="page-header">
+    <h1 class="page-header__title">Cherry-pick</h1>
+    <p class="page-header__subtitle">Drag to reorder · Remove commits you don't want</p>
+    <div class="page-header__actions">
+      <button class="btn btn--secondary" (click)="cancel()">Cancel</button>
+      <button class="btn btn--primary" [disabled]="executing() || queue().length === 0" (click)="execute()">
+        {{ executing() ? 'Running…' : 'Apply ' + queue().length + ' Commit' + (queue().length !== 1 ? 's' : '') }}
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="error()" class="error-banner">{{ error() }}</div>
+
+  <div *ngIf="queue().length === 0" class="empty-state">
+    No commits in queue. Go back to the graph and Cmd/Ctrl+click commits to queue them.
+  </div>
+
+  <ul *ngIf="queue().length > 0" class="pick-list" cdkDropList (cdkDropListDropped)="drop($event)">
+    <li *ngFor="let commit of queue()" class="pick-item" cdkDrag>
+      <div class="pick-item__drag" cdkDragHandle>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M10 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-4 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-8a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"/></svg>
+      </div>
+      <span class="pick-item__hash" [style.color]="commit.laneColor">{{ commit.shortHash }}</span>
+      <span class="pick-item__subject">{{ commit.subject }}</span>
+      <span class="pick-item__author">{{ commit.authorName }}</span>
+      <button class="pick-item__remove" (click)="remove(commit.hash)" title="Remove from queue">✕</button>
+      <div *cdkDragPlaceholder class="pick-item__placeholder"></div>
+    </li>
+  </ul>
+</div>
