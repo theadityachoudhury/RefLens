@@ -32,10 +32,7 @@ export class WelcomeComponent implements OnInit {
   openRepository(): void {
     this.loading.set(true);
     this.api.openRepository().subscribe({
-      next: (repo) => {
-        this.repoService.openRecentRepository(repo);
-        this.router.navigate(['/graph']);
-      },
+      next: (repo) => this.openRecent(repo),
       error: () => this.loading.set(false),
       complete: () => this.loading.set(false),
     });
