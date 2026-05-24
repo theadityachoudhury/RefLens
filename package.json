@@ -13,6 +13,7 @@
     "build:ng": "ng build --configuration production",
     "build:electron": "tsc -p tsconfig.electron.json",
     "build:electron:watch": "tsc -p tsconfig.electron.json --watch",
+    "build:icon": "node scripts/generate-icon.js",
     "release:clean": "node scripts/clean-release.js",
     "package": "npm run build && electron-builder && npm run release:clean",
     "package:mac": "npm run build && electron-builder --mac && npm run release:clean",
@@ -48,6 +49,7 @@
     "monaco-editor": "^0.44.0",
     "ngx-monaco-editor-v2": "^17.0.0",
     "nodemon": "^3.1.14",
+    "sharp": "^0.33.5",
     "typescript": "^5.4.0",
     "wait-on": "^7.2.0",
     "zone.js": "^0.14.4"
