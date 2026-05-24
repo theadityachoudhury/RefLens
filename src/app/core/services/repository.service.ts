@@ -4,7 +4,9 @@ import {
   BehaviorSubject,
   EMPTY,
   Subscription,
+  filter,
   switchMap,
+  take,
   timer,
 } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -58,8 +60,14 @@ export class RepositoryService implements OnDestroy {
   }
 
   tryRestoreLastRepo(): void {
-    if (!this.settings.restoreLastRepo()) return;
-    this.api.getRecentRepositories().subscribe((repos) => {
+    // Gate on settings.ready$ so the restoreLastRepo flag is read from persisted
+    // settings, not DEFAULT_SETTINGS (which has it false). Safe to call at any
+    // time — the ready$ ReplaySubject replays immediately if settings are loaded.
+    this.settings.ready$.pipe(
+      take(1),
+      filter(() => this.settings.restoreLastRepo()),
+      switchMap(() => this.api.getRecentRepositories()),
+    ).subscribe((repos) => {
       if (repos[0]) {
         this.openRecentRepository(repos[0]);
         this.router.navigate(['/graph']);
