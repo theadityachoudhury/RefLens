@@ -7,11 +7,8 @@ import { displayCombo } from '../../../../core/services/shortcut.service';
   selector: 'rl-settings-button',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <button class="titlebar-btn titlebar-btn--icon" (click)="open()" [title]="title()">
-      <span class="icon icon-settings"></span>
-    </button>
-  `,
+  templateUrl: './settings-button.component.html',
+  styleUrl: './settings-button.component.scss',
 })
 export class SettingsButtonComponent {
   private readonly router   = inject(Router);

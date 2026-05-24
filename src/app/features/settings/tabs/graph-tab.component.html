@@ -1,0 +1,93 @@
+<div class="settings-section">
+  <h2 class="settings-section__title">Display</h2>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Graph density</div>
+      <div class="settings-row__hint">Controls the vertical spacing between commits</div>
+    </div>
+    <div class="settings-row__control">
+      <div class="radio-group">
+        @for (opt of densityOptions; track opt.value) {
+          <button
+            class="radio-group__btn"
+            [class.radio-group__btn--active]="s.snapshot.graphDensity === opt.value"
+            (click)="set('graphDensity', opt.value)"
+          >{{ opt.label }}</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Commit dot size</div>
+      <div class="settings-row__hint">Radius of the dot drawn on each commit node ({{ s.commitRadius() }}px)</div>
+    </div>
+    <div class="settings-row__control">
+      <input
+        type="range" min="3" max="8"
+        [value]="s.commitRadius()"
+        (input)="set('graphCommitDotSize', +$any($event.target).value)"
+      />
+    </div>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Max commits to load</div>
+      <div class="settings-row__hint">Higher values may slow down large repositories</div>
+    </div>
+    <div class="settings-row__control">
+      <input
+        class="number-input"
+        type="number" min="100" max="2000" step="50"
+        [value]="s.graphMaxCommits()"
+        (change)="set('graphMaxCommits', +$any($event.target).value)"
+      />
+    </div>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Show all branches</div>
+      <div class="settings-row__hint">Include all local and remote branches in the graph</div>
+    </div>
+    <div class="settings-row__control">
+      <label class="toggle" [class.toggle--on]="s.graphShowAllBranches()">
+        <input type="checkbox" [checked]="s.graphShowAllBranches()" (change)="toggleAllBranches()" />
+        <span class="toggle__track"></span>
+        <span class="toggle__thumb"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="settings-section">
+  <h2 class="settings-section__title">Lane Colors</h2>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Color palette</div>
+      <div class="settings-row__hint">Color set used for graph lanes and edges</div>
+    </div>
+    <div class="settings-row__control">
+      <div class="palette-swatches">
+        @for (entry of paletteEntries; track entry.id) {
+          <button
+            class="palette-swatch"
+            [class.palette-swatch--active]="s.laneColorPalette() === entry.id"
+            (click)="set('graphLaneColorPalette', entry.id)"
+          >
+            <div class="palette-swatch__dots">
+              @for (color of entry.colors; track color) {
+                <span class="palette-swatch__dot" [style.background]="color"></span>
+              }
+            </div>
+            <span class="palette-swatch__label">{{ entry.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
