@@ -1,0 +1,29 @@
+@if (!settings.isMac()) {
+  <nav class="app-menu">
+    @for (menu of menus; track menu.label) {
+      <div class="app-menu__item" [class.open]="openMenu() === menu.label">
+        <button class="app-menu__trigger" (click)="toggle($event, menu.label)">
+          {{ menu.label }}
+        </button>
+        @if (openMenu() === menu.label) {
+          <ul class="app-menu__dropdown" role="menu">
+            @for (entry of menu.items; track $index) {
+              @if (entry.kind === 'separator') {
+                <li class="app-menu__separator" role="separator"></li>
+              } @else {
+                <li role="none">
+                  <button class="app-menu__entry" role="menuitem" (click)="run(entry)">
+                    <span class="app-menu__entry-label">{{ entry.label }}</span>
+                    @if (entry.shortcut) {
+                      <span class="app-menu__entry-shortcut">{{ entry.shortcut }}</span>
+                    }
+                  </button>
+                </li>
+              }
+            }
+          </ul>
+        }
+      </div>
+    }
+  </nav>
+}

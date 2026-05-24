@@ -23,6 +23,15 @@ npm run release:clean
 
 There are no tests currently.
 
+## Component Structure
+
+Every Angular component lives in its own folder and is split into exactly three files:
+- `component-name.component.ts` — class + metadata (`templateUrl`, `styleUrl`)
+- `component-name.component.html` — template
+- `component-name.component.scss` — styles
+
+Never inline `template:` or `styles:` directly in the component decorator.
+
 ## Architecture
 
 RefLens is an Electron + Angular desktop app. The two halves compile separately and communicate only through a typed IPC bridge.
