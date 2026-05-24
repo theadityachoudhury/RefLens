@@ -63,6 +63,11 @@ const electronAPI: ElectronAPI = {
   // Editor integration
   getAvailableEditors: () => ipcRenderer.invoke('editor:getAll'),
   openInEditor: (repoPath, editorId) => ipcRenderer.invoke('editor:open', repoPath, editorId),
+
+  // Settings
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  setSettings: (patch) => ipcRenderer.invoke('settings:set', patch),
+  resetSettings: () => ipcRenderer.invoke('settings:reset'),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
