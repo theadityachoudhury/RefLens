@@ -6,8 +6,10 @@ import { RefreshButtonComponent } from './shared/components/titlebar/refresh-but
 import { NewWindowButtonComponent } from './shared/components/titlebar/new-window-button/new-window-button.component';
 import { SettingsButtonComponent } from './shared/components/titlebar/settings-button/settings-button.component';
 import { UpdateButtonComponent } from './shared/components/titlebar/update-button/update-button.component';
+import { AppMenuComponent } from './shared/components/titlebar/app-menu/app-menu.component';
 import { RepositoryService } from './core/services/repository.service';
 import { ShortcutService } from './core/services/shortcut.service';
+import { SettingsService } from './core/services/settings.service';
 
 @Component({
   selector: 'app-root',
@@ -19,9 +21,11 @@ import { ShortcutService } from './core/services/shortcut.service';
     NewWindowButtonComponent,
     SettingsButtonComponent,
     UpdateButtonComponent,
+    AppMenuComponent,
   ],
   template: `
-    <div class="titlebar">
+    <div class="titlebar" [class.titlebar--with-menu]="!settings.isMac()">
+      <rl-app-menu />
       <div class="titlebar__actions">
         <rl-editor-picker />
         <rl-refresh-button />
@@ -39,6 +43,7 @@ export class AppComponent implements OnInit {
   private readonly shortcuts   = inject(ShortcutService);
   private readonly location    = inject(Location);
   private readonly router      = inject(Router);
+  protected readonly settings  = inject(SettingsService);
 
   ngOnInit(): void {
     // tryRestoreLastRepo() internally waits for settings.ready$ before reading
