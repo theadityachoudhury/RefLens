@@ -8,6 +8,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { RefreshService } from '../../core/services/refresh.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { CanvasRendererService } from './canvas-renderer.service';
 import { CommitGraph } from '../../../../shared/commit-graph';
 import type { CommitNode, BranchInfo, DiffFile } from '../../../../shared/git.types';
@@ -44,6 +45,7 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
     private refreshService: RefreshService,
+    private settingsService: SettingsService,
   ) {}
 
   get repoPath(): string {
@@ -84,7 +86,10 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadGraph(): void {
     this.loading = true;
-    this.api.getCommitGraph(this.repoPath, { maxCount: 500, allBranches: true }).subscribe({
+    this.api.getCommitGraph(this.repoPath, {
+      maxCount: this.settingsService.graphMaxCommits(),
+      allBranches: this.settingsService.graphShowAllBranches(),
+    }).subscribe({
       next: (commits) => {
         this.graph = CommitGraph.from(commits);
         this.loading = false;

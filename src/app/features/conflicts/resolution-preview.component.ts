@@ -8,6 +8,7 @@ import { MonacoEditorModule, DiffEditorModel } from 'ngx-monaco-editor-v2';
 import { ConflictService, ResolutionOption } from './conflict.service';
 import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
+import { SettingsService } from '../../core/services/settings.service';
 import type { ConflictFile, WorktreeInfo } from '../../../../shared/git.types';
 
 @Component({
@@ -24,6 +25,7 @@ export class ResolutionPreviewComponent implements OnInit, OnDestroy {
   private api = inject(ElectronApiService);
   private repoService = inject(RepositoryService);
   public conflictService = inject(ConflictService);
+  private settings = inject(SettingsService);
 
   fileIndex = signal(0);
   option = signal<ResolutionOption>('acceptCurrent');
@@ -47,23 +49,27 @@ export class ResolutionPreviewComponent implements OnInit, OnDestroy {
     return files[this.fileIndex()] ?? null;
   });
 
-  readonly diffEditorOptions = {
-    theme: 'vs-dark',
-    readOnly: true,
-    renderSideBySide: true,
-    minimap: { enabled: false },
-    fontSize: 12,
-    scrollBeyondLastLine: false,
-    enableSplitViewResizing: true,
-  };
+  get diffEditorOptions() {
+    return {
+      theme: this.settings.monacoTheme(),
+      readOnly: true,
+      renderSideBySide: this.settings.editorDiffLayout() === 'side-by-side',
+      minimap: { enabled: this.settings.editorMinimap() },
+      fontSize: this.settings.editorFontSize(),
+      scrollBeyondLastLine: false,
+      enableSplitViewResizing: true,
+    };
+  }
 
-  readonly manualEditorOptions = {
-    theme: 'vs-dark',
-    minimap: { enabled: false },
-    fontSize: 12,
-    scrollBeyondLastLine: false,
-    language: 'plaintext',
-  };
+  get manualEditorOptions() {
+    return {
+      theme: this.settings.monacoTheme(),
+      minimap: { enabled: this.settings.editorMinimap() },
+      fontSize: this.settings.editorFontSize(),
+      scrollBeyondLastLine: false,
+      language: 'plaintext',
+    };
+  }
 
   constructor() {
     // Recompute diff models whenever file or resolved content changes

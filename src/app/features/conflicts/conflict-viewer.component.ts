@@ -7,6 +7,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { FormsModule } from '@angular/forms';
 import { ConflictService, ResolutionOption } from './conflict.service';
+import { SettingsService } from '../../core/services/settings.service';
 import type { ConflictFile, ConflictHunk } from '../../../../shared/git.types';
 
 declare const monaco: typeof import('monaco-editor');
@@ -28,6 +29,7 @@ export class ConflictViewerComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   public conflictService = inject(ConflictService);
+  private settings = inject(SettingsService);
 
   fileIndex = signal(0);
   file = computed<ConflictFile | null>(() => {
@@ -41,16 +43,16 @@ export class ConflictViewerComponent implements OnInit {
 
   get editorOptions() {
     return {
-      theme: 'vs-dark',
+      theme: this.settings.monacoTheme(),
       language: this.fileLanguage,
       readOnly: true,
-      minimap: { enabled: false },
+      minimap: { enabled: this.settings.editorMinimap() },
       scrollBeyondLastLine: false,
-      fontSize: 12,
-      lineNumbers: 'on' as const,
+      fontSize: this.settings.editorFontSize(),
+      lineNumbers: (this.settings.editorLineNumbers() ? 'on' : 'off') as 'on' | 'off',
       renderLineHighlight: 'none' as const,
       scrollbar: { vertical: 'auto' as const },
-      wordWrap: 'off' as const,
+      wordWrap: (this.settings.editorWordWrap() ? 'on' : 'off') as 'on' | 'off',
     };
   }
 
