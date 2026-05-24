@@ -22,15 +22,14 @@
   ],
   "mac": {
     "target": [
-      { "target": "dmg", "arch": ["arm64", "x64"] }
+      { "target": "dmg", "arch": ["arm64", "x64"] },
+      { "target": "zip", "arch": ["arm64", "x64"] }
     ],
     "icon": "build-resources/icons/mac/icon.icns",
     "category": "public.app-category.developer-tools",
     "darkModeSupport": true
   },
-  "dmg": {
-    "writeUpdateInfo": true
-  },
+  "dmg": {},
   "win": {
     "target": [
       { "target": "nsis", "arch": ["x64"] }
