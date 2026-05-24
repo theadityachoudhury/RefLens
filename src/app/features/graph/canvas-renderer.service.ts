@@ -182,7 +182,7 @@ export class CanvasRendererService implements OnDestroy {
       for (const edge of commit.edgesToParents) {
         const to = posMap.get(edge.toHash);
         if (!to) continue;
-        const color = this.laneColor(edge.fromLane);
+        const color = this.laneColor(edge.toLane);
         const bucket = byColor.get(color);
         const entry = { edge, from: commit, to };
         if (bucket) bucket.push(entry);
