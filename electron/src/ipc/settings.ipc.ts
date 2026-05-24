@@ -1,11 +1,18 @@
 import { ipcMain } from 'electron';
-import { getSettingsStore } from '../settings/settings.store';
+import { getSettingsStore, platformDefaultShortcuts } from '../settings/settings.store';
 import { DEFAULT_SETTINGS } from '../../../shared/settings.types';
 import type { AppSettings } from '../../../shared/settings.types';
 
 export function registerSettingsHandlers(): void {
   ipcMain.handle('settings:get', () => {
-    return getSettingsStore().get('settings');
+    const stored = getSettingsStore().get('settings');
+    // Deep-merge with DEFAULT_SETTINGS so new fields added in later versions
+    // are present even for users with an older settings file on disk.
+    return {
+      ...DEFAULT_SETTINGS,
+      ...stored,
+      keyboardShortcuts: { ...DEFAULT_SETTINGS.keyboardShortcuts, ...stored.keyboardShortcuts },
+    };
   });
 
   ipcMain.handle('settings:set', (_, patch: Partial<AppSettings>) => {
@@ -18,7 +25,13 @@ export function registerSettingsHandlers(): void {
 
   ipcMain.handle('settings:reset', () => {
     const store = getSettingsStore();
-    store.set('settings', DEFAULT_SETTINGS);
-    return DEFAULT_SETTINGS;
+    const reset: AppSettings = {
+      ...DEFAULT_SETTINGS,
+      keyboardShortcuts: platformDefaultShortcuts(),
+    };
+    store.set('settings', reset);
+    return reset;
   });
+
+  ipcMain.handle('system:platform', () => process.platform);
 }

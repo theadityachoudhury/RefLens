@@ -68,6 +68,9 @@ const electronAPI: ElectronAPI = {
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSettings: (patch) => ipcRenderer.invoke('settings:set', patch),
   resetSettings: () => ipcRenderer.invoke('settings:reset'),
+
+  // System
+  getPlatform: () => ipcRenderer.invoke('system:platform'),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

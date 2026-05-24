@@ -160,4 +160,9 @@ export class ElectronApiService {
   resetSettings(): Observable<AppSettings> {
     return from(this.api.resetSettings());
   }
+
+  // System
+  getPlatform(): Observable<string> {
+    return from(this.api.getPlatform());
+  }
 }

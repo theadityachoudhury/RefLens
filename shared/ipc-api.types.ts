@@ -83,4 +83,7 @@ export interface ElectronAPI {
   getSettings(): Promise<AppSettings>;
   setSettings(patch: Partial<AppSettings>): Promise<AppSettings>;
   resetSettings(): Promise<AppSettings>;
+
+  // System
+  getPlatform(): Promise<string>;
 }

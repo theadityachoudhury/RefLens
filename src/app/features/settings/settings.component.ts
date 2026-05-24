@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Location, NgClass } from '@angular/common';
-import { Router } from '@angular/router';
 import { SettingsService } from '../../core/services/settings.service';
 import { SettingsAppearanceTabComponent } from './tabs/appearance-tab.component';
 import { SettingsGraphTabComponent } from './tabs/graph-tab.component';
 import { SettingsEditorTabComponent } from './tabs/editor-tab.component';
 import { SettingsGitTabComponent } from './tabs/git-tab.component';
 import { SettingsApplicationTabComponent } from './tabs/application-tab.component';
+import { SettingsKeyboardTabComponent } from './tabs/keyboard-tab.component';
 
-type SettingsTab = 'appearance' | 'graph' | 'editor' | 'git' | 'application';
+type SettingsTab = 'appearance' | 'graph' | 'editor' | 'git' | 'application' | 'keyboard';
 
 const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'appearance',  label: 'Appearance'  },
@@ -16,6 +16,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'editor',      label: 'Editor'      },
   { id: 'git',         label: 'Git'         },
   { id: 'application', label: 'Application' },
+  { id: 'keyboard',    label: 'Keyboard'    },
 ];
 
 @Component({
@@ -29,6 +30,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
     SettingsEditorTabComponent,
     SettingsGitTabComponent,
     SettingsApplicationTabComponent,
+    SettingsKeyboardTabComponent,
   ],
   template: `
     <div class="settings-page">
@@ -58,6 +60,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
             @case ('editor')      { <rl-settings-editor-tab      /> }
             @case ('git')         { <rl-settings-git-tab         /> }
             @case ('application') { <rl-settings-application-tab /> }
+            @case ('keyboard')    { <rl-settings-keyboard-tab    /> }
           }
         </div>
       </div>

@@ -359,8 +359,10 @@ export class CanvasRendererService implements OnDestroy {
 
     const hit = this.hitTest(e.clientX, e.clientY);
     if (hit) {
+      const modifier = this.settings.snapshot.cherryPickModifier;
+      const ctrlOrCmd = modifier === 'alt' ? e.altKey : (e.ctrlKey || e.metaKey);
       this.ngZone.run(() =>
-        this.commitClick$.next({ commit: hit, ctrlOrCmd: e.ctrlKey || e.metaKey }),
+        this.commitClick$.next({ commit: hit, ctrlOrCmd }),
       );
     }
   };
