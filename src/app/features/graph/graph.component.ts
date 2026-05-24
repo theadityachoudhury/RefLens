@@ -9,7 +9,7 @@ import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { CanvasRendererService } from './canvas-renderer.service';
 import { CommitGraph } from '../../../../shared/commit-graph';
-import type { CommitNode, BranchInfo } from '../../../../shared/git.types';
+import type { CommitNode, BranchInfo, DiffFile } from '../../../../shared/git.types';
 
 @Component({
   selector: 'rl-graph',
@@ -26,6 +26,9 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
   graph: CommitGraph | null = null;
   branches: BranchInfo[] = [];
   selectedCommit: CommitNode | null = null;
+  commitFiles: (DiffFile & { status: string })[] | null = null;
+  commitBody: string | null = null;
+  detailLoading = false;
   cherryPickQueue: CommitNode[] = [];
   loading = true;
 
@@ -99,7 +102,31 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectCommit(commit: CommitNode): void {
     this.selectedCommit = commit;
+    this.commitFiles = null;
+    this.commitBody = null;
+    this.detailLoading = true;
     this.renderer.selectCommit(commit.hash);
+    this.cdr.markForCheck();
+
+    this.api.getCommitDetail(this.repoPath, commit.hash).subscribe({
+      next: (detail) => {
+        this.commitFiles = detail.diff as (DiffFile & { status: string })[];
+        this.commitBody = detail.body || null;
+        this.detailLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.detailLoading = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  closeDetail(): void {
+    this.selectedCommit = null;
+    this.commitFiles = null;
+    this.commitBody = null;
+    this.renderer.selectCommit(null);
     this.cdr.markForCheck();
   }
 
