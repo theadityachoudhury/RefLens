@@ -2,13 +2,14 @@ import { ipcMain } from 'electron';
 import { spawn } from 'child_process';
 import { getGit } from '../git/git.service';
 import { createSequenceEditorScript } from '../git/rebase.editor';
+import { readSettings } from '../settings/settings.store';
 import type { RebaseEntry } from '../../../shared/git.types';
 
 export function registerRebaseHandlers(): void {
   ipcMain.handle('rebase:state', async (_, repoPath: string) => {
     const git = getGit(repoPath);
     try {
-      const log = await git.log({ maxCount: 20 });
+      const log = await git.log({ maxCount: readSettings().rebaseDepth });
       return {
         entries: log.all.map((c) => ({
           action: 'pick' as const,

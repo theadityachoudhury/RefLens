@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { getGit } from '../git/git.service';
+import { readSettings } from '../settings/settings.store';
 import type { WorktreeInfo } from '../../../shared/git.types';
 
 // Keyed by `${windowId}:${worktreeId}` to isolate worktrees per window
@@ -16,7 +17,8 @@ function winKey(event: Electron.IpcMainInvokeEvent, id: string): string {
 export function registerWorktreeHandlers(): void {
   ipcMain.handle('worktree:create', async (event, repoPath: string, id: string) => {
     const key = winKey(event, id);
-    const worktreePath = path.join(os.tmpdir(), 'reflens', `wt-${id}`);
+    const base = readSettings().worktreePath || path.join(os.tmpdir(), 'reflens');
+    const worktreePath = path.join(base, `wt-${id}`);
     fs.mkdirSync(path.dirname(worktreePath), { recursive: true });
 
     const git = getGit(repoPath);

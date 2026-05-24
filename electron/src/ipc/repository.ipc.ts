@@ -2,6 +2,7 @@ import { dialog, ipcMain } from 'electron';
 import path from 'path';
 import Store from 'electron-store';
 import { getGit } from '../git/git.service';
+import { readSettings } from '../settings/settings.store';
 import type { RepoInfo } from '../../../shared/ipc-api.types';
 
 interface StoreSchema {
@@ -35,7 +36,8 @@ export function registerRepositoryHandlers(): void {
     // Persist to recent repos
     const recent = store.get('recentRepos', []);
     const filtered = recent.filter((r) => r.path !== repoPath);
-    store.set('recentRepos', [repoInfo, ...filtered].slice(0, 10));
+    const limit = readSettings().recentReposLimit;
+    store.set('recentRepos', [repoInfo, ...filtered].slice(0, limit));
 
     return repoInfo;
   });
