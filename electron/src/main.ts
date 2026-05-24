@@ -55,35 +55,41 @@ app.whenReady().then(() => {
 	registerGlobalHandlers(createWindow);
 	createWindow();
 
-	const menu = Menu.buildFromTemplate([
-		{
-			label: app.name,
-			submenu: [{ role: "about" }, { type: "separator" }, { role: "quit" }],
-		},
-		{
-			label: "File",
-			submenu: [
-				{
-					label: "New Window",
-					accelerator: "CmdOrCtrl+N",
-					click: () => createWindow(),
-				},
-			],
-		},
-		{
-			label: "Edit",
-			submenu: [
-				{ role: "undo" },
-				{ role: "redo" },
-				{ type: "separator" },
-				{ role: "cut" },
-				{ role: "copy" },
-				{ role: "paste" },
-				{ role: "selectAll" },
-			],
-		},
-	]);
-	Menu.setApplicationMenu(menu);
+	if (process.platform === "darwin") {
+		// macOS: native menu lives in the system menu bar outside the window — keep it
+		const menu = Menu.buildFromTemplate([
+			{
+				label: app.name,
+				submenu: [{ role: "about" }, { type: "separator" }, { role: "quit" }],
+			},
+			{
+				label: "File",
+				submenu: [
+					{
+						label: "New Window",
+						accelerator: "CmdOrCtrl+N",
+						click: () => createWindow(),
+					},
+				],
+			},
+			{
+				label: "Edit",
+				submenu: [
+					{ role: "undo" },
+					{ role: "redo" },
+					{ type: "separator" },
+					{ role: "cut" },
+					{ role: "copy" },
+					{ role: "paste" },
+					{ role: "selectAll" },
+				],
+			},
+		]);
+		Menu.setApplicationMenu(menu);
+	} else {
+		// Windows/Linux: suppress the native menu bar — the Angular titlebar renders its own
+		Menu.setApplicationMenu(null);
+	}
 
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
