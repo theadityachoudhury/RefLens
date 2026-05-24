@@ -5,7 +5,14 @@ import type { AppSettings } from '../../../shared/settings.types';
 
 export function registerSettingsHandlers(): void {
   ipcMain.handle('settings:get', () => {
-    return getSettingsStore().get('settings');
+    const stored = getSettingsStore().get('settings');
+    // Deep-merge with DEFAULT_SETTINGS so new fields added in later versions
+    // are present even for users with an older settings file on disk.
+    return {
+      ...DEFAULT_SETTINGS,
+      ...stored,
+      keyboardShortcuts: { ...DEFAULT_SETTINGS.keyboardShortcuts, ...stored.keyboardShortcuts },
+    };
   });
 
   ipcMain.handle('settings:set', (_, patch: Partial<AppSettings>) => {

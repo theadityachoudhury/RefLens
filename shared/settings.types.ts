@@ -1,3 +1,9 @@
+export interface ShortcutMap {
+  refresh: string;       // default: 'mod+r'
+  openSettings: string;  // default: 'mod+,'
+  goBack: string;        // default: 'escape'
+}
+
 export interface AppSettings {
   // Appearance
   theme: 'dark' | 'light' | 'system';
@@ -28,6 +34,10 @@ export interface AppSettings {
   openDevTools: boolean;
   worktreePath: string;
   autoStageAfterResolve: boolean;
+
+  // Keyboard shortcuts
+  keyboardShortcuts: ShortcutMap;
+  cherryPickModifier: 'ctrlOrMeta' | 'alt';
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -55,4 +65,11 @@ export const DEFAULT_SETTINGS: AppSettings = {
   openDevTools: false,
   worktreePath: '',
   autoStageAfterResolve: false,
+
+  keyboardShortcuts: {
+    refresh: 'mod+r',
+    openSettings: 'mod+,',
+    goBack: 'escape',
+  },
+  cherryPickModifier: 'ctrlOrMeta',
 };
