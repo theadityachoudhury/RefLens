@@ -1,0 +1,43 @@
+.about-hero {
+  padding: 1.5rem 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  &__name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  &__version {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  &__desc {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-top: 0.125rem;
+  }
+}
+
+.btn--accent {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  font-family: inherit;
+  transition: opacity 0.12s;
+
+  &:hover { opacity: 0.85; }
+
+  &--sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+}
+
+button[disabled] { opacity: 0.5; cursor: not-allowed; }

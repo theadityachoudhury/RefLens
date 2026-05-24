@@ -1,0 +1,33 @@
+<div class="settings-page">
+  <div class="settings-header">
+    <button class="settings-header__back btn btn--ghost btn--sm" (click)="back()">
+      ← Back
+    </button>
+    <h1 class="settings-header__title">Settings</h1>
+    <button class="btn btn--ghost btn--sm" (click)="resetAll()">Reset to Defaults</button>
+  </div>
+
+  <div class="settings-body">
+    <nav class="settings-nav">
+      @for (tab of tabs; track tab.id) {
+        <button
+          class="settings-nav__item"
+          [class.settings-nav__item--active]="activeTab() === tab.id"
+          (click)="activeTab.set(tab.id)"
+        >{{ tab.label }}</button>
+      }
+    </nav>
+
+    <div class="settings-content">
+      @switch (activeTab()) {
+        @case ('appearance')  { <rl-settings-appearance-tab  /> }
+        @case ('graph')       { <rl-settings-graph-tab       /> }
+        @case ('editor')      { <rl-settings-editor-tab      /> }
+        @case ('git')         { <rl-settings-git-tab         /> }
+        @case ('application') { <rl-settings-application-tab /> }
+        @case ('keyboard')    { <rl-settings-keyboard-tab    /> }
+        @case ('about')       { <rl-settings-about-tab       /> }
+      }
+    </div>
+  </div>
+</div>

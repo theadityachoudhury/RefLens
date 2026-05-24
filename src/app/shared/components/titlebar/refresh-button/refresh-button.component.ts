@@ -7,16 +7,8 @@ import { RefreshService } from '../../../../core/services/refresh.service';
   selector: 'rl-refresh-button',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <button
-      *ngIf="activeRepo$ | async"
-      class="titlebar-btn titlebar-btn--icon"
-      (click)="refresh()"
-      title="Refresh"
-    >
-      <span class="icon icon-refresh"></span>
-    </button>
-  `,
+  templateUrl: './refresh-button.component.html',
+  styleUrl: './refresh-button.component.scss',
 })
 export class RefreshButtonComponent {
   readonly activeRepo$ = this.repoService.activeRepo$;

@@ -1,0 +1,109 @@
+<div class="settings-section">
+  <div class="section-header-row">
+    <h2 class="section-title">Configurable Shortcuts</h2>
+    <span class="os-badge">{{ osBadge() }}</span>
+  </div>
+
+  <div class="shortcuts-table">
+    @for (row of shortcutRows; track row.action) {
+      <div class="shortcut-row" [class.shortcut-row--editing]="editingAction() === row.action">
+
+        <div class="shortcut-row__info">
+          <span class="shortcut-row__label">{{ row.label }}</span>
+          <span class="shortcut-row__hint">{{ row.hint }}</span>
+        </div>
+
+        <div class="shortcut-row__binding">
+          @if (editingAction() === row.action) {
+            <input
+              class="shortcut-record"
+              [value]="recordingDisplay()"
+              placeholder="Press keys…"
+              readonly
+              autofocus
+              (keydown)="onRecord($event)"
+              (blur)="cancelEdit()"
+            />
+            <button class="shortcut-btn shortcut-btn--save"
+              [disabled]="!pendingCombo()"
+              (mousedown)="$event.preventDefault()"
+              (click)="saveEdit(row.action)">Save</button>
+            <button class="shortcut-btn shortcut-btn--cancel"
+              (mousedown)="$event.preventDefault()"
+              (click)="cancelEdit()">Cancel</button>
+          } @else {
+            <span class="key-combo">
+              @for (part of parts(s.snapshot.keyboardShortcuts[row.action]); track $index; let last = $last) {
+                <kbd class="key-badge">{{ part }}</kbd>
+                @if (!last) { <span class="key-sep">+</span> }
+              }
+            </span>
+            <button class="shortcut-btn" (click)="startEdit(row.action)">Edit</button>
+
+          }
+        </div>
+
+      </div>
+    }
+  </div>
+</div>
+
+<div class="settings-section">
+  <h2 class="settings-section__title">Cherry-Pick Trigger</h2>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Click modifier</div>
+      <div class="settings-row__hint">Modifier key held while clicking a commit to queue it for cherry-pick</div>
+    </div>
+    <div class="settings-row__control">
+      <div class="radio-group">
+        <button class="radio-group__btn"
+          [class.radio-group__btn--active]="s.snapshot.cherryPickModifier === 'ctrlOrMeta'"
+          (click)="setModifier('ctrlOrMeta')">Ctrl / ⌘</button>
+        <button class="radio-group__btn"
+          [class.radio-group__btn--active]="s.snapshot.cherryPickModifier === 'alt'"
+          (click)="setModifier('alt')">Alt / ⌥</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="settings-section">
+  <h2 class="settings-section__title">Fixed Shortcuts</h2>
+  <p class="fixed-note">These bindings are built into the system and cannot be changed.</p>
+
+  <div class="shortcuts-table">
+    <!-- Cherry-pick row: derived from cherryPickModifier + platform -->
+    <div class="shortcut-row">
+      <div class="shortcut-row__info">
+        <span class="shortcut-row__label">Cherry-pick queue</span>
+        <span class="shortcut-row__hint">Toggle a commit into the cherry-pick queue (mouse)</span>
+      </div>
+      <div class="shortcut-row__binding">
+        <kbd class="key-badge key-badge--fixed key-badge--wide">{{ cherryPickBinding() }}</kbd>
+      </div>
+    </div>
+
+    @for (row of fixedRows; track row.label) {
+      <div class="shortcut-row">
+        <div class="shortcut-row__info">
+          <span class="shortcut-row__label">{{ row.label }}</span>
+          <span class="shortcut-row__hint">{{ row.hint }}</span>
+        </div>
+        <div class="shortcut-row__binding">
+          @if (row.combo) {
+            <span class="key-combo key-combo--fixed">
+              @for (part of parts(row.combo); track $index; let last = $last) {
+                <kbd class="key-badge key-badge--fixed">{{ part }}</kbd>
+                @if (!last) { <span class="key-sep">+</span> }
+              }
+            </span>
+          } @else {
+            <kbd class="key-badge key-badge--fixed key-badge--wide">{{ row.binding }}</kbd>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -23,19 +23,7 @@ import { SettingsService } from './core/services/settings.service';
     UpdateButtonComponent,
     AppMenuComponent,
   ],
-  template: `
-    <div class="titlebar" [class.titlebar--with-menu]="!settings.isMac()">
-      <rl-app-menu />
-      <div class="titlebar__actions">
-        <rl-editor-picker />
-        <rl-refresh-button />
-        <rl-new-window-button />
-        <rl-update-button />
-        <rl-settings-button />
-      </div>
-    </div>
-    <div class="content"><router-outlet /></div>
-  `,
+  templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {

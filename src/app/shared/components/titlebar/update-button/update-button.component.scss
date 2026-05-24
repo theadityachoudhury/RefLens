@@ -1,0 +1,19 @@
+.update-btn {
+  color: var(--accent);
+}
+
+.update-btn--ready {
+  animation: update-pulse 2s ease-in-out infinite;
+}
+
+.update-btn__percent {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--accent);
+}
+
+@keyframes update-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}

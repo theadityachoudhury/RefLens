@@ -16,39 +16,8 @@ type UpdateState = UpdateEvent['type'] | 'idle';
   selector: 'rl-update-button',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    @if (state() === 'available') {
-      <button class="titlebar-btn titlebar-btn--icon update-btn" (click)="download()" title="Update available — click to download">
-        <span class="icon icon-update"></span>
-      </button>
-    } @else if (state() === 'downloading') {
-      <button class="titlebar-btn titlebar-btn--icon update-btn update-btn--progress" disabled [title]="'Downloading update… ' + percent() + '%'">
-        <span class="update-btn__percent">{{ percent() }}%</span>
-      </button>
-    } @else if (state() === 'downloaded') {
-      <button class="titlebar-btn titlebar-btn--icon update-btn update-btn--ready" (click)="install()" title="Restart to install update">
-        <span class="icon icon-update"></span>
-      </button>
-    }
-  `,
-  styles: [`
-    .update-btn {
-      color: var(--accent);
-    }
-    .update-btn--ready {
-      animation: update-pulse 2s ease-in-out infinite;
-    }
-    .update-btn__percent {
-      font-size: 9px;
-      font-weight: 600;
-      line-height: 1;
-      color: var(--accent);
-    }
-    @keyframes update-pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.5; }
-    }
-  `],
+  templateUrl: './update-button.component.html',
+  styleUrl: './update-button.component.scss',
 })
 export class UpdateButtonComponent implements OnInit, OnDestroy {
   private readonly api = inject(ElectronApiService);

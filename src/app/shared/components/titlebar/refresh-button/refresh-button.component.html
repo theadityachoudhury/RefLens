@@ -1,0 +1,8 @@
+<button
+  *ngIf="activeRepo$ | async"
+  class="titlebar-btn titlebar-btn--icon"
+  (click)="refresh()"
+  title="Refresh"
+>
+  <span class="icon icon-refresh"></span>
+</button>

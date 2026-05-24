@@ -1,0 +1,57 @@
+<div class="settings-section">
+  <h2 class="settings-section__title">Application</h2>
+
+  <div class="about-hero">
+    <div class="about-hero__name">RefLens</div>
+    <div class="about-hero__version">v{{ version() || '…' }}</div>
+    <div class="about-hero__desc">Git Visualizer — visual merge conflicts, rebase, cherry-pick</div>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Source code</div>
+      <div class="settings-row__hint">View the project on GitHub</div>
+    </div>
+    <div class="settings-row__control">
+      <button class="btn btn--ghost btn--sm" (click)="open('https://github.com/theadityachoudhury/RefLens')">
+        GitHub ↗
+      </button>
+    </div>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Report an issue</div>
+      <div class="settings-row__hint">Found a bug? Open a GitHub issue</div>
+    </div>
+    <div class="settings-row__control">
+      <button class="btn btn--ghost btn--sm" (click)="open('https://github.com/theadityachoudhury/RefLens/issues/new')">
+        Open issue ↗
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="settings-section">
+  <h2 class="settings-section__title">Updates</h2>
+
+  <div class="settings-row">
+    <div class="settings-row__info">
+      <div class="settings-row__label">Software update</div>
+      <div class="settings-row__hint">{{ statusHint() }}</div>
+    </div>
+    <div class="settings-row__control">
+      @if (updateState() === 'downloaded') {
+        <button class="btn btn--accent btn--sm" (click)="install()">Restart &amp; Install</button>
+      } @else if (updateState() === 'downloading') {
+        <button class="btn btn--ghost btn--sm" disabled>Downloading {{ percent() }}%…</button>
+      } @else if (updateState() === 'available') {
+        <button class="btn btn--accent btn--sm" (click)="download()">Download Update</button>
+      } @else {
+        <button class="btn btn--ghost btn--sm" [disabled]="updateState() === 'checking'" (click)="check()">
+          {{ updateState() === 'checking' ? 'Checking…' : 'Check for Updates' }}
+        </button>
+      }
+    </div>
+  </div>
+</div>

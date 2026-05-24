@@ -1,0 +1,13 @@
+@if (state() === 'available') {
+  <button class="titlebar-btn titlebar-btn--icon update-btn" (click)="download()" title="Update available — click to download">
+    <span class="icon icon-update"></span>
+  </button>
+} @else if (state() === 'downloading') {
+  <button class="titlebar-btn titlebar-btn--icon update-btn update-btn--progress" disabled [title]="'Downloading update… ' + percent() + '%'">
+    <span class="update-btn__percent">{{ percent() }}%</span>
+  </button>
+} @else if (state() === 'downloaded') {
+  <button class="titlebar-btn titlebar-btn--icon update-btn update-btn--ready" (click)="install()" title="Restart to install update">
+    <span class="icon icon-update"></span>
+  </button>
+}
