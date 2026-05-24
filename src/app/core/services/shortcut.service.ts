@@ -5,41 +5,58 @@ import { SettingsService } from './settings.service';
 import { RefreshService } from './refresh.service';
 import type { ShortcutMap } from '../../../../shared/settings.types';
 
-/** Normalize a KeyboardEvent into the internal shortcut format (e.g. "mod+r", "escape"). */
-export function eventToCombo(e: KeyboardEvent): string {
-  const isMac = navigator.platform.toUpperCase().includes('MAC');
+// ---------------------------------------------------------------------------
+// Pure helpers — accept isMac as a parameter so they work before the service
+// is constructed and can also be used in non-injectable contexts.
+// ---------------------------------------------------------------------------
+
+function keyLabel(p: string, isMac: boolean): string {
+  switch (p) {
+    case 'mod':    return isMac ? 'Command' : 'Ctrl';
+    case 'alt':    return isMac ? 'Option'  : 'Alt';
+    case 'shift':  return 'Shift';
+    case 'ctrl':   return 'Control';
+    case 'escape': return 'Esc';
+    case 'enter':  return 'Enter';
+    default:       return p.length === 1 ? p.toUpperCase() : p;
+  }
+}
+
+/**
+ * Split a stored combo string into individual per-key display labels.
+ * Pass isMac explicitly — reads from SettingsService.isMac() in components.
+ *
+ * 'mod+r'    → ['⌘', 'R']       (Mac)    or ['Ctrl', 'R']    (Win/Linux)
+ * 'mod+,'    → ['⌘', ',']       (Mac)    or ['Ctrl', ',']    (Win/Linux)
+ * 'escape'   → ['Esc']
+ */
+export function displayParts(combo: string, isMac: boolean): string[] {
+  return combo.split('+').map(p => keyLabel(p, isMac));
+}
+
+/** Flat string — only for the recording-mode input value. */
+export function displayCombo(combo: string, isMac: boolean): string {
+  return displayParts(combo, isMac).join(isMac ? '' : '+');
+}
+
+/**
+ * Convert a KeyboardEvent into the canonical combo string stored in settings.
+ * Uses isMac to decide whether Meta or Ctrl maps to 'mod'.
+ */
+export function eventToCombo(e: KeyboardEvent, isMac: boolean): string {
   const parts: string[] = [];
   const modPressed = isMac ? e.metaKey : e.ctrlKey;
   if (modPressed) parts.push('mod');
-  if (e.altKey) parts.push('alt');
+  if (e.altKey)   parts.push('alt');
   if (e.shiftKey) parts.push('shift');
-  if (e.ctrlKey && !isMac) { /* already captured via mod */ }
+  // On Mac, Ctrl is separate from mod; include it explicitly when pressed without meta
+  if (e.ctrlKey && isMac && !e.metaKey) parts.push('ctrl');
   const key = e.key.toLowerCase();
   if (!['control', 'meta', 'alt', 'shift'].includes(key)) parts.push(key);
   return parts.join('+');
 }
 
-/** Render a stored combo string as a human-readable label (⌘R / Ctrl+R). */
-export function displayCombo(combo: string): string {
-  const isMac = navigator.platform.toUpperCase().includes('MAC');
-  return combo.split('+').map(p => {
-    switch (p) {
-      case 'mod':    return isMac ? '⌘'  : 'Ctrl';
-      case 'alt':    return isMac ? '⌥'  : 'Alt';
-      case 'shift':  return isMac ? '⇧'  : 'Shift';
-      case 'ctrl':   return 'Ctrl';
-      case 'escape': return 'Esc';
-      default:       return p.toUpperCase();
-    }
-  }).join(isMac ? '' : '+');
-}
-
-/** Returns true when the event matches the stored shortcut string. */
-function matches(e: KeyboardEvent, shortcut: string): boolean {
-  return eventToCombo(e) === shortcut.toLowerCase();
-}
-
-/** Tags that should suppress shortcut handling when focused. */
+/** Tags that should suppress global shortcut handling when focused. */
 const INPUT_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
 
 @Injectable({ providedIn: 'root' })
@@ -49,7 +66,7 @@ export class ShortcutService implements OnDestroy {
   private readonly refresh  = inject(RefreshService);
 
   /** Fires when the configured "go back" shortcut is pressed. Components
-   *  subscribe to this and handle context-specific back behaviour. */
+   *  subscribe and handle context-specific behaviour (e.g. close panel). */
   readonly goBack$ = new Subject<void>();
 
   constructor() {
@@ -60,19 +77,22 @@ export class ShortcutService implements OnDestroy {
     const target = e.target as HTMLElement;
     if (INPUT_TAGS.has(target.tagName) || target.isContentEditable) return;
 
+    // Use the authoritative platform from the main process.
+    const isMac = this.settings.isMac();
+    const combo = eventToCombo(e, isMac);
     const sc: ShortcutMap = this.settings.snapshot.keyboardShortcuts;
 
-    if (matches(e, sc.refresh)) {
+    if (combo === sc.refresh) {
       e.preventDefault();
       this.refresh.trigger();
       return;
     }
-    if (matches(e, sc.openSettings)) {
+    if (combo === sc.openSettings) {
       e.preventDefault();
       this.router.navigate(['/settings']);
       return;
     }
-    if (matches(e, sc.goBack)) {
+    if (combo === sc.goBack) {
       e.preventDefault();
       this.goBack$.next();
       return;

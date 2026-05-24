@@ -6,6 +6,7 @@ import { AppSettings, DEFAULT_SETTINGS } from '../../../../shared/settings.types
 export class SettingsService {
   private readonly api = inject(ElectronApiService);
   private readonly _settings = signal<AppSettings>(DEFAULT_SETTINGS);
+  private readonly _platform = signal<string>('darwin');
 
   // Computed selectors
   readonly theme             = computed(() => this._settings().theme);
@@ -24,6 +25,11 @@ export class SettingsService {
   readonly restoreLastRepo   = computed(() => this._settings().restoreLastRepo);
   readonly autoStage         = computed(() => this._settings().autoStageAfterResolve);
 
+  /** The Node.js platform string from the main process — more reliable than navigator.platform. */
+  readonly platform  = computed(() => this._platform());
+  readonly isMac     = computed(() => this._platform() === 'darwin');
+  readonly isWindows = computed(() => this._platform() === 'win32');
+
   private readonly _sysDark = window.matchMedia('(prefers-color-scheme: dark)');
 
   readonly resolvedTheme = computed<'dark' | 'light'>(() => {
@@ -37,6 +43,8 @@ export class SettingsService {
       this._settings.set(s);
       this.applyToDOM(s);
     });
+
+    this.api.getPlatform().subscribe(p => this._platform.set(p));
 
     this._sysDark.addEventListener('change', () => this.applyToDOM(this._settings()));
   }

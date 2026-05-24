@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { getSettingsStore } from '../settings/settings.store';
+import { getSettingsStore, platformDefaultShortcuts } from '../settings/settings.store';
 import { DEFAULT_SETTINGS } from '../../../shared/settings.types';
 import type { AppSettings } from '../../../shared/settings.types';
 
@@ -25,7 +25,13 @@ export function registerSettingsHandlers(): void {
 
   ipcMain.handle('settings:reset', () => {
     const store = getSettingsStore();
-    store.set('settings', DEFAULT_SETTINGS);
-    return DEFAULT_SETTINGS;
+    const reset: AppSettings = {
+      ...DEFAULT_SETTINGS,
+      keyboardShortcuts: platformDefaultShortcuts(),
+    };
+    store.set('settings', reset);
+    return reset;
   });
+
+  ipcMain.handle('system:platform', () => process.platform);
 }
