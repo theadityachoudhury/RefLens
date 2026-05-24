@@ -1,7 +1,7 @@
 .conflict-viewer {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: #0d1117;
   color: #e6edf3;
   overflow: hidden;
@@ -138,7 +138,7 @@
 
 .loading-state {
   display: flex; align-items: center; justify-content: center;
-  gap: 0.75rem; height: 100vh; color: #8b949e;
+  gap: 0.75rem; height: 100%; color: #8b949e;
 }
 .spinner {
   width: 20px; height: 20px; border: 2px solid #30363d;

@@ -1,9 +1,10 @@
-<div class="graph-layout">
+<div class="graph-layout" [class.graph-layout--with-detail]="selectedCommit">
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar__repo">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="#58a6ff">
-        <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z"/>
+        <path
+          d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z" />
       </svg>
       <span class="sidebar__repo-name">{{ repoService.activeRepo?.name }}</span>
     </div>
@@ -11,11 +12,9 @@
     <div class="sidebar__section">
       <div class="sidebar__section-title">Branches</div>
       <ul class="branch-list">
-        <li *ngFor="let branch of branches"
-            class="branch-list__item"
-            [class.branch-list__item--current]="branch.isCurrent"
-            [class.branch-list__item--remote]="branch.isRemote"
-            (click)="!branch.isRemote && checkoutBranch(branch.name)">
+        <li *ngFor="let branch of branches" class="branch-list__item"
+          [class.branch-list__item--current]="branch.isCurrent" [class.branch-list__item--remote]="branch.isRemote"
+          (click)="!branch.isRemote && checkoutBranch(branch.name)">
           <span class="branch-list__dot" [style.background]="branch.isCurrent ? '#3fb950' : '#58a6ff'"></span>
           <span class="branch-list__name">{{ branch.name }}</span>
         </li>
@@ -33,7 +32,7 @@
       <div class="spinner"></div>
     </div>
 
-    <svg #svgEl class="graph-svg" [style.display]="loading ? 'none' : 'block'"></svg>
+    <canvas #canvasEl class="graph-canvas" [style.display]="loading ? 'none' : 'block'"></canvas>
 
     <!-- Cherry-pick queue badge -->
     <div *ngIf="cherryPickQueue.length > 0" class="cherry-pick-badge">
@@ -47,7 +46,7 @@
   <div class="detail-panel" *ngIf="selectedCommit">
     <div class="detail-panel__header">
       <span class="detail-panel__hash">{{ selectedCommit.shortHash }}</span>
-      <button class="detail-panel__close" (click)="selectedCommit = null; renderer.selectCommit(null)">✕</button>
+      <button class="detail-panel__close" (click)="closeDetail()">✕</button>
     </div>
     <p class="detail-panel__subject">{{ selectedCommit.subject }}</p>
     <div class="detail-panel__meta">
@@ -57,7 +56,27 @@
     <div class="detail-panel__refs" *ngIf="selectedCommit.refs.length > 0">
       <span *ngFor="let ref of selectedCommit.refs" class="ref-badge">{{ ref }}</span>
     </div>
-    <p *ngIf="selectedCommit.body" class="detail-panel__body">{{ selectedCommit.body }}</p>
+    <p *ngIf="commitBody" class="detail-panel__body">{{ commitBody }}</p>
+
+    <div class="detail-panel__files">
+      <div class="detail-panel__files-header">
+        <span class="detail-panel__files-title">Changed files</span>
+        <span *ngIf="commitFiles" class="detail-panel__files-count">{{ commitFiles.length }}</span>
+      </div>
+      <div *ngIf="detailLoading" class="detail-panel__files-loading">
+        <div class="spinner spinner--sm"></div>
+      </div>
+      <ul *ngIf="commitFiles" class="file-list">
+        <li *ngFor="let file of commitFiles" class="file-list__item">
+          <span class="file-list__status" [attr.data-status]="file.status[0]">{{ file.status[0] }}</span>
+          <span class="file-list__path" [title]="file.newPath">
+            {{ file.newPath }}
+            <span *ngIf="file.status[0] === 'R' && file.oldPath !== file.newPath" class="file-list__old-path">← {{ file.oldPath }}</span>
+          </span>
+        </li>
+      </ul>
+    </div>
+
     <div class="detail-panel__tip">Cmd/Ctrl+click to queue for cherry-pick</div>
   </div>
 </div>
