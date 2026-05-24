@@ -39,5 +39,12 @@ export const routes: Routes = [
         (m) => m.CherryPickComponent,
       ),
   },
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('./features/settings/settings.component').then(
+        (m) => m.SettingsComponent,
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];
