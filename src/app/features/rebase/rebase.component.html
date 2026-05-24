@@ -1,0 +1,46 @@
+<div class="rebase-page">
+  <header class="page-header">
+    <h1 class="page-header__title">Interactive Rebase</h1>
+    <div class="page-header__subtitle">Drag to reorder · Change action per commit</div>
+    <div class="page-header__actions">
+      <label class="onto-label">
+        Onto:
+        <input class="onto-input" [value]="ontoRef()" (input)="ontoRef.set($any($event.target).value)" />
+      </label>
+      <button class="btn btn--secondary" (click)="cancel()">Cancel</button>
+      <button class="btn btn--primary" [disabled]="executing() || entries().length === 0" (click)="execute()">
+        {{ executing() ? 'Running…' : 'Start Rebase' }}
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <span>Loading commits…</span>
+  </div>
+
+  <div *ngIf="error()" class="error-banner">
+    {{ error() }}
+  </div>
+
+  <ul *ngIf="!loading()" class="rebase-list" cdkDropList (cdkDropListDropped)="drop($event)">
+    <li *ngFor="let entry of entries(); let i = index"
+        class="rebase-item"
+        [class.rebase-item--drop]="entry.action === 'drop'"
+        cdkDrag>
+      <div class="rebase-item__drag" cdkDragHandle>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M10 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-4 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-8a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"/></svg>
+      </div>
+      <select class="rebase-item__action" [value]="entry.action" (change)="setAction(i, $any($event.target).value)">
+        <option *ngFor="let a of actions" [value]="a">{{ a }}</option>
+      </select>
+      <span class="rebase-item__hash">{{ entry.hash.slice(0, 7) }}</span>
+      <span class="rebase-item__subject">{{ entry.subject }}</span>
+      <div *cdkDragPlaceholder class="rebase-item__placeholder"></div>
+    </li>
+  </ul>
+
+  <div *ngIf="!loading() && entries().length === 0" class="empty-state">
+    No commits to rebase. Adjust the "Onto" ref.
+  </div>
+</div>
