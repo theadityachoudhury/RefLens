@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, fromEventPattern } from 'rxjs';
 import type { ElectronAPI, EditorInfo, RepoInfo } from '../../../../shared/ipc-api.types';
+import type { AppSettings } from '../../../../shared/settings.types';
 import type {
   BranchInfo,
   CommitNode,
@@ -147,5 +148,16 @@ export class ElectronApiService {
   }
   openInEditor(repoPath: string, editorId: string): Observable<void> {
     return from(this.api.openInEditor(repoPath, editorId));
+  }
+
+  // Settings
+  getSettings(): Observable<AppSettings> {
+    return from(this.api.getSettings());
+  }
+  setSettings(patch: Partial<AppSettings>): Observable<AppSettings> {
+    return from(this.api.setSettings(patch));
+  }
+  resetSettings(): Observable<AppSettings> {
+    return from(this.api.resetSettings());
   }
 }
