@@ -13,10 +13,11 @@
     "build:ng": "ng build --configuration production",
     "build:electron": "tsc -p tsconfig.electron.json",
     "build:electron:watch": "tsc -p tsconfig.electron.json --watch",
-    "package": "npm run build && electron-builder",
-    "package:mac": "npm run build && electron-builder --mac",
-    "package:win": "npm run build && electron-builder --win",
-    "package:linux": "npm run build && electron-builder --linux"
+    "release:clean": "node scripts/clean-release.js",
+    "package": "npm run build && electron-builder && npm run release:clean",
+    "package:mac": "npm run build && electron-builder --mac && npm run release:clean",
+    "package:win": "npm run build && electron-builder --win && npm run release:clean",
+    "package:linux": "npm run build && electron-builder --linux && npm run release:clean"
   },
   "dependencies": {
     "dotenv": "^17.4.2",

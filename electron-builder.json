@@ -1,6 +1,8 @@
 {
   "appId": "com.reflens.app",
   "productName": "RefLens",
+  "compression": "maximum",
+  "electronLanguages": ["en-US"],
   "directories": {
     "output": "release",
     "buildResources": "build-resources"
@@ -8,17 +10,44 @@
   "files": [
     "dist/**/*",
     "dist-electron/**/*",
+    "!dist-electron/**/*.d.ts",
+    "!dist-electron/**/*.js.map",
     {
       "from": "node_modules",
       "to": "node_modules",
       "filter": [
-        "simple-git/**/*",
-        "electron-store/**/*",
-        "electron-log/**/*",
-        "conf/**/*",
-        "dot-prop/**/*",
-        "env-paths/**/*",
-        "atomically/**/*"
+        "dotenv/lib/**",
+        "dotenv/package.json",
+        "simple-git/dist/**",
+        "simple-git/package.json",
+        "simple-git/promise.js",
+        "electron-log/src/**",
+        "electron-log/package.json",
+        "electron-store/index.js",
+        "electron-store/package.json",
+        "conf/**",
+        "dot-prop/**",
+        "env-paths/**",
+        "atomically/**",
+        "debounce-fn/**",
+        "mimic-fn/**",
+        "onetime/**",
+        "p-limit/**",
+        "p-try/**",
+        "pkg-up/**",
+        "semver/**",
+        "ajv/dist/**",
+        "ajv/package.json",
+        "ajv-formats/**",
+        "json-schema-traverse/**",
+        "json-schema-typed/**",
+        "fast-deep-equal/**",
+        "is-obj/**",
+        "type-fest/**",
+        "require-from-string/**",
+        "uri-js/**",
+        "@kwsites/**",
+        "@simple-git/**"
       ]
     }
   ],
@@ -29,10 +58,18 @@
     "category": "public.app-category.developer-tools",
     "darkModeSupport": true
   },
+  "dmg": {
+    "writeUpdateInfo": false
+  },
   "win": {
     "target": [
       { "target": "nsis", "arch": ["x64"] }
     ]
+  },
+  "nsis": {
+    "oneClick": true,
+    "createDesktopShortcut": true,
+    "deleteAppDataOnUninstall": false
   },
   "linux": {
     "target": [
@@ -40,5 +77,6 @@
     ],
     "category": "Development"
   },
-  "asar": true
+  "asar": true,
+  "asarUnpack": []
 }
