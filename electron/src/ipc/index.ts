@@ -10,6 +10,7 @@ import { registerCherryPickHandlers } from './cherrypick.ipc';
 import { registerDiffHandlers } from './diff.ipc';
 import { registerWindowHandlers } from './window.ipc';
 import { registerEditorHandlers } from './editor.ipc';
+import { registerUpdaterHandlers } from './updater.ipc';
 
 // Called once at startup — ipcMain.handle channels are process-global.
 // Per-window routing is done inside handlers via event.sender.
@@ -25,4 +26,5 @@ export function registerGlobalHandlers(createWindow: () => BrowserWindow): void 
   registerDiffHandlers();
   registerWindowHandlers(createWindow);
   registerEditorHandlers();
+  registerUpdaterHandlers();
 }

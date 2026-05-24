@@ -11,44 +11,13 @@
     "dist/browser/**/*",
     "dist-electron/**/*",
     "!dist-electron/**/*.d.ts",
-    "!dist-electron/**/*.js.map",
+    "!dist-electron/**/*.js.map"
+  ],
+  "publish": [
     {
-      "from": "node_modules",
-      "to": "node_modules",
-      "filter": [
-        "dotenv/lib/**",
-        "dotenv/package.json",
-        "simple-git/dist/**",
-        "simple-git/package.json",
-        "simple-git/promise.js",
-        "electron-log/src/**",
-        "electron-log/package.json",
-        "electron-store/index.js",
-        "electron-store/package.json",
-        "conf/**",
-        "dot-prop/**",
-        "env-paths/**",
-        "atomically/**",
-        "debounce-fn/**",
-        "mimic-fn/**",
-        "onetime/**",
-        "p-limit/**",
-        "p-try/**",
-        "pkg-up/**",
-        "semver/**",
-        "ajv/dist/**",
-        "ajv/package.json",
-        "ajv-formats/**",
-        "json-schema-traverse/**",
-        "json-schema-typed/**",
-        "fast-deep-equal/**",
-        "is-obj/**",
-        "type-fest/**",
-        "require-from-string/**",
-        "uri-js/**",
-        "@kwsites/**",
-        "@simple-git/**"
-      ]
+      "provider": "github",
+      "owner": "theadityachoudhury",
+      "repo": "RefLens"
     }
   ],
   "mac": {
@@ -60,7 +29,7 @@
     "darkModeSupport": true
   },
   "dmg": {
-    "writeUpdateInfo": false
+    "writeUpdateInfo": true
   },
   "win": {
     "target": [

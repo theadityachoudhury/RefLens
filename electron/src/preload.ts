@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { ElectronAPI } from '../../shared/ipc-api.types';
+import type { ElectronAPI, UpdateEvent } from '../../shared/ipc-api.types';
 import type { ProcessOutput, RepositoryStatus } from '../../shared/git.types';
 
 const electronAPI: ElectronAPI = {
@@ -71,6 +71,18 @@ const electronAPI: ElectronAPI = {
 
   // System
   getPlatform: () => ipcRenderer.invoke('system:platform'),
+  getAppVersion: () => ipcRenderer.invoke('system:version'),
+  openExternal: (url) => ipcRenderer.invoke('system:openExternal', url),
+
+  // Updates
+  checkForUpdate: () => ipcRenderer.invoke('updater:check'),
+  downloadUpdate: () => ipcRenderer.invoke('updater:download'),
+  installUpdate: () => ipcRenderer.invoke('updater:install'),
+  onUpdateEvent: (cb) => {
+    const handler = (_: unknown, event: UpdateEvent) => cb(event);
+    ipcRenderer.on('updater:event', handler);
+    return () => ipcRenderer.removeListener('updater:event', handler);
+  },
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);

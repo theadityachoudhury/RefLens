@@ -5,6 +5,7 @@ import { EditorPickerComponent } from './shared/components/titlebar/editor-picke
 import { RefreshButtonComponent } from './shared/components/titlebar/refresh-button/refresh-button.component';
 import { NewWindowButtonComponent } from './shared/components/titlebar/new-window-button/new-window-button.component';
 import { SettingsButtonComponent } from './shared/components/titlebar/settings-button/settings-button.component';
+import { UpdateButtonComponent } from './shared/components/titlebar/update-button/update-button.component';
 import { AppMenuComponent } from './shared/components/titlebar/app-menu/app-menu.component';
 import { RepositoryService } from './core/services/repository.service';
 import { ShortcutService } from './core/services/shortcut.service';
@@ -19,6 +20,7 @@ import { SettingsService } from './core/services/settings.service';
     RefreshButtonComponent,
     NewWindowButtonComponent,
     SettingsButtonComponent,
+    UpdateButtonComponent,
     AppMenuComponent,
   ],
   template: `
@@ -28,6 +30,7 @@ import { SettingsService } from './core/services/settings.service';
         <rl-editor-picker />
         <rl-refresh-button />
         <rl-new-window-button />
+        <rl-update-button />
         <rl-settings-button />
       </div>
     </div>

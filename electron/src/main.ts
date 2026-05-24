@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, Menu } from "electron";
 import path from "path";
 import { config } from "dotenv";
 import { registerGlobalHandlers } from "./ipc/index";
+import { checkForUpdatesOnStartup } from "./ipc/updater.ipc";
 import { readSettings } from "./settings/settings.store";
 
 config({ path: path.join(__dirname, "../../../.env") });
@@ -54,6 +55,8 @@ app.whenReady().then(() => {
 	// Register IPC channels once — handlers use event.sender to route per-window
 	registerGlobalHandlers(createWindow);
 	createWindow();
+
+	if (!isDev) checkForUpdatesOnStartup();
 
 	if (process.platform === "darwin") {
 		// macOS: native menu lives in the system menu bar outside the window — keep it
