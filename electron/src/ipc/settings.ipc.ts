@@ -118,7 +118,7 @@ function sanitizePatch(patch: unknown): Partial<AppSettings> {
       if (key in sc && isValidCombo(sc[key])) validSc[key] = sc[key] as string;
     }
     if (Object.keys(validSc).length > 0) {
-      out.keyboardShortcuts = validSc as AppSettings['keyboardShortcuts'];
+      out.keyboardShortcuts = validSc as unknown as AppSettings['keyboardShortcuts'];
     }
   }
 

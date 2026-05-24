@@ -4,6 +4,7 @@ import path from 'path';
 import os from 'os';
 import { getGit } from '../git/git.service';
 import { readSettings } from '../settings/settings.store';
+import { isSafeId, safeResolveWithin } from './ipc-guards';
 import type { WorktreeInfo } from '../../../shared/git.types';
 
 // Keyed by `${windowId}:${worktreeId}` to isolate worktrees per window
@@ -16,6 +17,8 @@ function winKey(event: Electron.IpcMainInvokeEvent, id: string): string {
 
 export function registerWorktreeHandlers(): void {
   ipcMain.handle('worktree:create', async (event, repoPath: string, id: string) => {
+    if (!isSafeId(id)) throw new Error(`Invalid worktree id: ${id}`);
+
     const key = winKey(event, id);
     const base = readSettings().worktreePath || path.join(os.tmpdir(), 'reflens');
     const worktreePath = path.join(base, `wt-${id}`);
@@ -33,7 +36,11 @@ export function registerWorktreeHandlers(): void {
   ipcMain.handle('worktree:applyFile', async (event, id: string, filePath: string, content: string) => {
     const info = activeWorktrees.get(winKey(event, id));
     if (!info) throw new Error(`Worktree ${id} not found`);
-    const fullPath = path.join(info.path, filePath);
+
+    const fullPath = safeResolveWithin(info.path, filePath);
+    if (!fullPath) throw new Error(`Invalid file path: ${filePath}`);
+    if (typeof content !== 'string') throw new Error('content must be a string');
+
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, content, 'utf-8');
   });
