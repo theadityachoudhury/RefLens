@@ -14,8 +14,6 @@ export function createWindow(): BrowserWindow {
 	const win = new BrowserWindow({
 		width: 1440,
 		height: 900,
-		minWidth: 1100,
-		minHeight: 640,
 		titleBarStyle: "hiddenInset",
 		trafficLightPosition: { x: 16, y: 14 },
 		backgroundColor: "#0d1117",
@@ -38,7 +36,8 @@ export function createWindow(): BrowserWindow {
 	}
 
 	win.webContents.once("did-finish-load", () => {
-		const openDevTools = wantDeveloperToolsToOpen || readSettings().openDevTools;
+		const openDevTools =
+			wantDeveloperToolsToOpen || readSettings().openDevTools;
 		if (openDevTools) win.webContents.openDevTools({ mode: "detach" });
 	});
 

@@ -16,6 +16,7 @@ export class WelcomeComponent implements OnInit {
   recentRepos = signal<RepoInfo[]>([]);
   recentReposLength = computed(() => this.recentRepos().length);
   loading = signal(false);
+  repoError = signal<string | null>(null);
 
   constructor(
     private repoService: RepositoryService,
@@ -33,12 +34,16 @@ export class WelcomeComponent implements OnInit {
     this.loading.set(true);
     this.api.openRepository().subscribe({
       next: (repo) => this.openRecent(repo),
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.loading.set(false);
+        this.repoError.set(err.message || 'Failed to open repository');
+      },
       complete: () => this.loading.set(false),
     });
   }
 
   openRecent(repo: RepoInfo): void {
+    this.repoError.set(null);
     this.repoService.openRecentRepository(repo);
     this.router.navigate(['/graph']);
   }

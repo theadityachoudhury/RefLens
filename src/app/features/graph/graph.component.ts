@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, distinctUntilChanged, map, skip, takeUntil } from 'rxjs';
 import { ElectronApiService } from '../../core/services/electron-api.service';
 import { RepositoryService } from '../../core/services/repository.service';
 import { RefreshService } from '../../core/services/refresh.service';
@@ -63,6 +63,14 @@ export class GraphComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigate(['/conflicts']);
       }
     });
+
+    // Reload graph when HEAD or branch changes externally (terminal branch switch, new commit, etc.)
+    this.repoService.status$.pipe(
+      takeUntil(this.destroy$),
+      map((s) => `${s?.headHash ?? ''}:${s?.currentBranch ?? ''}`),
+      distinctUntilChanged(),
+      skip(1), // skip the initial BehaviorSubject replay — already loading on init
+    ).subscribe(() => this.refreshGraph());
 
     this.refreshService.refresh$.pipe(takeUntil(this.destroy$)).subscribe(() => this.refreshGraph());
 

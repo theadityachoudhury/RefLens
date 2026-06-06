@@ -1,8 +1,7 @@
-import { Injectable, Injector, OnDestroy, inject } from '@angular/core';
+import { Injectable, Injector, NgZone, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   BehaviorSubject,
-  EMPTY,
   Subscription,
   filter,
   switchMap,
@@ -21,6 +20,7 @@ export class RepositoryService implements OnDestroy {
   private readonly settings = inject(SettingsService);
   private readonly injector = inject(Injector);
   private readonly router = inject(Router);
+  private readonly ngZone = inject(NgZone);
 
   private readonly _activeRepo = new BehaviorSubject<RepoInfo | null>(null);
   readonly activeRepo$ = this._activeRepo.asObservable();
@@ -80,12 +80,22 @@ export class RepositoryService implements OnDestroy {
     this.statusChangedSub?.unsubscribe();
 
     this.statusSub = toObservable(this.settings.refreshInterval, { injector: this.injector }).pipe(
-      switchMap((interval) => interval === 0 ? EMPTY : timer(0, interval)),
-      switchMap(() => this.api.getRepositoryStatus(repoPath)),
+      switchMap((interval) => {
+        if (interval === 0) {
+          // No periodic polling requested — fetch status once immediately.
+          return this.api.getRepositoryStatus(repoPath);
+        }
+        // Poll on an interval, with an immediate first tick.
+        return timer(0, interval).pipe(
+          switchMap(() => this.api.getRepositoryStatus(repoPath)),
+        );
+      }),
     ).subscribe((status) => this._status.next(status));
 
+    this.api.watchRepository(repoPath).subscribe();
+
     this.statusChangedSub = this.api.onStatusChanged()
-      .subscribe((status) => this._status.next(status));
+      .subscribe((status) => this.ngZone.run(() => this._status.next(status)));
   }
 
   refreshStatus(): void {

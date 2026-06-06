@@ -35,6 +35,9 @@ export class ElectronApiService {
   getRepositoryStatus(repoPath: string): Observable<RepositoryStatus> {
     return from(this.api.getRepositoryStatus(repoPath));
   }
+  watchRepository(repoPath: string): Observable<void> {
+    return from(this.api.watchRepository(repoPath));
+  }
   onStatusChanged(): Observable<RepositoryStatus> {
     return fromEventPattern<RepositoryStatus>(
       (handler) => this.api.onStatusChanged(handler as (s: RepositoryStatus) => void),
