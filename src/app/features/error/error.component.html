@@ -1,0 +1,14 @@
+<div class="error-page">
+  <div class="error-page__card">
+    <div class="error-page__icon">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" stroke="var(--danger)" stroke-width="1.5"/>
+        <line x1="16" y1="9" x2="16" y2="18" stroke="var(--danger)" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="16" cy="22" r="1.25" fill="var(--danger)"/>
+      </svg>
+    </div>
+    <h2 class="error-page__title">{{ title }}</h2>
+    <p class="error-page__message">{{ message }}</p>
+    <button class="btn btn--secondary" (click)="back()">Go Back</button>
+  </div>
+</div>

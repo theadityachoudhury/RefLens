@@ -12,11 +12,19 @@
   border-bottom: 1px solid var(--border-default);
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding-right: 0.75rem;
 
-  &--with-menu {
-    justify-content: space-between;
+  &--mac &__left {
+    padding-left: 78px;
+  }
+
+  &__left {
+    -webkit-app-region: no-drag;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding-left: 0.5rem;
   }
 
   &__actions {

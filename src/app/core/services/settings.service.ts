@@ -96,11 +96,13 @@ export class SettingsService {
       document.body.classList.add(`accent-${s.accentColor}`);
     }
 
-    // Font size class
+    // Font size class — also update <html> so rem-based elements scale correctly
     (['small', 'medium', 'large'] as const).forEach(c =>
       document.body.classList.remove(`font-${c}`),
     );
     document.body.classList.add(`font-${s.uiFontSize}`);
+    const rootFontSize = ({ small: '13px', medium: '14px', large: '16px' } as const)[s.uiFontSize];
+    document.documentElement.style.fontSize = rootFontSize;
 
     // Monaco global theme
     const monaco = (window as unknown as { monaco?: { editor: { setTheme(t: string): void } } }).monaco;

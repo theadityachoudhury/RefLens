@@ -46,5 +46,10 @@ export const routes: Routes = [
         (m) => m.SettingsComponent,
       ),
   },
+  {
+    path: 'error',
+    loadComponent: () =>
+      import('./features/error/error.component').then((m) => m.ErrorComponent),
+  },
   { path: '**', redirectTo: '' },
 ];

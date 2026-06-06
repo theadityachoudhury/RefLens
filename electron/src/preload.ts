@@ -7,6 +7,7 @@ const electronAPI: ElectronAPI = {
   openRepository: (p) => ipcRenderer.invoke('repo:open', p),
   getRecentRepositories: () => ipcRenderer.invoke('repo:getRecent'),
   getRepositoryStatus: (r) => ipcRenderer.invoke('repo:status', r),
+  watchRepository: (r) => ipcRenderer.invoke('repo:watch', r),
   onStatusChanged: (cb) => {
     const handler = (_: unknown, status: RepositoryStatus) => cb(status);
     ipcRenderer.on('repo:statusChanged', handler);

@@ -33,7 +33,12 @@ export class WelcomeComponent implements OnInit {
     this.loading.set(true);
     this.api.openRepository().subscribe({
       next: (repo) => this.openRecent(repo),
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.loading.set(false);
+        this.router.navigate(['/error'], {
+          state: { title: 'Failed to open repository', message: err.message || 'An unexpected error occurred.' },
+        });
+      },
       complete: () => this.loading.set(false),
     });
   }

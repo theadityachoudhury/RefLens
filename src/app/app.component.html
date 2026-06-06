@@ -1,5 +1,8 @@
-<div class="titlebar" [class.titlebar--with-menu]="!settings.isMac()">
-  <rl-app-menu />
+<div class="titlebar" [class.titlebar--mac]="settings.isMac()">
+  <div class="titlebar__left">
+    <rl-app-menu />
+    <rl-nav-buttons />
+  </div>
   <div class="titlebar__actions">
     <rl-editor-picker />
     <rl-refresh-button />

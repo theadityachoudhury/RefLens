@@ -63,8 +63,14 @@
     background: var(--green-action);
     color: #fff;
 
-    &:hover:not(:disabled) { background: var(--green-action-hover); }
-    &:disabled { opacity: 0.5; cursor: default; }
+    &:hover:not(:disabled) {
+      background: var(--green-action-hover);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   }
 }
 

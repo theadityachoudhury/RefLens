@@ -39,6 +39,7 @@ export interface ElectronAPI {
   getRecentRepositories(): Promise<RepoInfo[]>;
   getRepositoryStatus(repoPath: string): Promise<RepositoryStatus>;
   onStatusChanged(callback: (status: RepositoryStatus) => void): () => void;
+  watchRepository(repoPath: string): Promise<void>;
 
   // Graph
   getCommitGraph(repoPath: string, options: GraphOptions): Promise<CommitNode[]>;
