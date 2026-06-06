@@ -67,7 +67,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.version.outputs.tag }}
+          ref: refs/tags/${{ needs.version.outputs.tag }}
 
       - uses: actions/setup-node@v4
         with:
