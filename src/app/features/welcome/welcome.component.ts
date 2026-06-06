@@ -16,7 +16,6 @@ export class WelcomeComponent implements OnInit {
   recentRepos = signal<RepoInfo[]>([]);
   recentReposLength = computed(() => this.recentRepos().length);
   loading = signal(false);
-  repoError = signal<string | null>(null);
 
   constructor(
     private repoService: RepositoryService,
@@ -36,14 +35,15 @@ export class WelcomeComponent implements OnInit {
       next: (repo) => this.openRecent(repo),
       error: (err) => {
         this.loading.set(false);
-        this.repoError.set(err.message || 'Failed to open repository');
+        this.router.navigate(['/error'], {
+          state: { title: 'Failed to open repository', message: err.message || 'An unexpected error occurred.' },
+        });
       },
       complete: () => this.loading.set(false),
     });
   }
 
   openRecent(repo: RepoInfo): void {
-    this.repoError.set(null);
     this.repoService.openRecentRepository(repo);
     this.router.navigate(['/graph']);
   }

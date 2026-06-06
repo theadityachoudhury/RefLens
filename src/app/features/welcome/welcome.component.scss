@@ -121,22 +121,3 @@
     white-space: nowrap;
   }
 }
-
-.welcome__error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-
-  &-message {
-    padding: 0.75rem 1rem;
-    background: var(--red);
-    border: 1px solid var(--red);
-    border-radius: 6px;
-    color: var(--red-text);
-    display: flex;
-    margin: 0;
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-}
