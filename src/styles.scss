@@ -140,7 +140,9 @@ html, body {
   -webkit-mask-position: center;
   -webkit-mask-size: contain;
 }
-.icon-chevron-down { width: 8px;  height: 5px;  -webkit-mask-image: url('assets/icons/chevron-down.svg'); }
+.icon-chevron-down  { width: 8px;  height: 5px;  -webkit-mask-image: url('assets/icons/chevron-down.svg');  }
+.icon-chevron-left  { width: 5px;  height: 9px;  -webkit-mask-image: url('assets/icons/chevron-left.svg');  }
+.icon-chevron-right { width: 5px;  height: 9px;  -webkit-mask-image: url('assets/icons/chevron-right.svg'); }
 .icon-new-window   { width: 12px; height: 12px; -webkit-mask-image: url('assets/icons/new-window.svg');   }
 .icon-refresh      { width: 14px; height: 14px; -webkit-mask-image: url('assets/icons/refresh.svg');      }
 .icon-settings     { width: 14px; height: 14px; -webkit-mask-image: url('assets/icons/settings.svg');     }

@@ -1,0 +1,16 @@
+<button
+  class="titlebar-btn titlebar-btn--icon nav-btn"
+  [disabled]="!canGoBack()"
+  (click)="back()"
+  title="Go Back"
+>
+  <span class="icon icon-chevron-left"></span>
+</button>
+<button
+  class="titlebar-btn titlebar-btn--icon nav-btn"
+  [disabled]="!canGoForward()"
+  (click)="forward()"
+  title="Go Forward"
+>
+  <span class="icon icon-chevron-right"></span>
+</button>

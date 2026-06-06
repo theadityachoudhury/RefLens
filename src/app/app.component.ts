@@ -7,6 +7,7 @@ import { NewWindowButtonComponent } from './shared/components/titlebar/new-windo
 import { SettingsButtonComponent } from './shared/components/titlebar/settings-button/settings-button.component';
 import { UpdateButtonComponent } from './shared/components/titlebar/update-button/update-button.component';
 import { AppMenuComponent } from './shared/components/titlebar/app-menu/app-menu.component';
+import { NavButtonsComponent } from './shared/components/titlebar/nav-buttons/nav-buttons.component';
 import { RepositoryService } from './core/services/repository.service';
 import { ShortcutService } from './core/services/shortcut.service';
 import { SettingsService } from './core/services/settings.service';
@@ -22,6 +23,7 @@ import { SettingsService } from './core/services/settings.service';
     SettingsButtonComponent,
     UpdateButtonComponent,
     AppMenuComponent,
+    NavButtonsComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
