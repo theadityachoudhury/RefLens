@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  NgZone,
   OnDestroy,
   OnInit,
   inject,
@@ -21,6 +22,7 @@ type UpdateState = UpdateEvent['type'] | 'idle';
 })
 export class UpdateButtonComponent implements OnInit, OnDestroy {
   private readonly api = inject(ElectronApiService);
+  private readonly ngZone = inject(NgZone);
   private sub?: Subscription;
 
   protected readonly state = signal<UpdateState>('idle');
@@ -28,8 +30,10 @@ export class UpdateButtonComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub = this.api.onUpdateEvent().subscribe((event) => {
-      this.state.set(event.type);
-      if (event.type === 'downloading') this.percent.set(Math.round(event.percent));
+      this.ngZone.run(() => {
+        this.state.set(event.type);
+        if (event.type === 'downloading') this.percent.set(Math.round(event.percent));
+      });
     });
   }
 

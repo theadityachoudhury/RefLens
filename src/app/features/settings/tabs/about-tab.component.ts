@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  NgZone,
   OnDestroy,
   OnInit,
   inject,
@@ -21,6 +22,7 @@ type UpdateState = UpdateEvent['type'] | 'idle';
 })
 export class SettingsAboutTabComponent implements OnInit, OnDestroy {
   private readonly api = inject(ElectronApiService);
+  private readonly ngZone = inject(NgZone);
   private sub?: Subscription;
 
   protected readonly version     = signal('');
@@ -42,8 +44,10 @@ export class SettingsAboutTabComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.api.getAppVersion().subscribe((v) => this.version.set(v));
     this.sub = this.api.onUpdateEvent().subscribe((event) => {
-      this.updateState.set(event.type);
-      if (event.type === 'downloading') this.percent.set(Math.round(event.percent));
+      this.ngZone.run(() => {
+        this.updateState.set(event.type);
+        if (event.type === 'downloading') this.percent.set(Math.round(event.percent));
+      });
     });
   }
 

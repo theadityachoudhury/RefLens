@@ -6,17 +6,20 @@ on:
 
 permissions:
   contents: write
-  issues: write
-  pull-requests: write
 
 jobs:
-  release:
+  # ── 1. Bump patch version, commit, tag, push ─────────────────────────────
+  version:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag:     ${{ steps.bump.outputs.tag }}
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          token: ${{ secrets.GH_PAT }}
 
       - uses: actions/setup-node@v4
         with:
@@ -25,10 +28,93 @@ jobs:
 
       - run: npm ci
 
-      - run: npx semantic-release
+      - name: Bump patch version
+        id: bump
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          npm version patch --no-git-tag-version
+          VERSION=$(node -p "require('./package.json').version")
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION"    >> $GITHUB_OUTPUT
+
+          git add package.json package-lock.json
+          git commit -m "chore(release): $VERSION [skip ci]"
+          git tag "v$VERSION"
+          git push origin main --follow-tags
+
+  # ── 2. Build on each platform (parallel) ─────────────────────────────────
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            flag: --mac
+            name: mac
+          - os: windows-latest
+            flag: --win
+            name: win
+          - os: ubuntu-latest
+            flag: --linux
+            name: linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Package
+        run: npx electron-builder ${{ matrix.flag }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Clean intermediate artifacts
+        run: node scripts/clean-release.js
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.name }}
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.exe
+            release/*.AppImage
+          if-no-files-found: warn
+
+  # ── 3. Create GitHub release with all artifacts ───────────────────────────
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: RefLens ${{ needs.version.outputs.tag }}
+          generate_release_notes: true
+          files: artifacts/**
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-          GIT_AUTHOR_NAME: github-actions[bot]
-          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
