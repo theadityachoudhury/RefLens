@@ -16,6 +16,7 @@ RefLens is not a general-purpose Git GUI. It is a focused tool designed to make 
 - **Conflict Resolution** — a 3-step guided flow with side-by-side Monaco editors, no raw conflict markers, and a "Run & Test" worktree sandbox
 - **Interactive Rebase** — drag-and-drop commit reordering with pick/squash/fixup/drop/reword/edit actions
 - **Cherry-pick Queue** — Ctrl+click commits on the graph to queue them, reorder, and apply as a batch
+- **Back/Forward Navigation** — browser-style history arrows in the titlebar for navigating between views
 
 ---
 
@@ -74,6 +75,9 @@ Auto-updates are delivered through GitHub Releases and install on next quit.
 - Configurable keyboard shortcuts with live recording
 - Detected editor integration (VS Code, Cursor, Windsurf, Zed, WebStorm, and more)
 - Auto-update controls
+
+### Updates
+Automatic updates are delivered through GitHub Releases. A badge in the titlebar appears when an update is available; downloads and installs on next quit. New releases are published automatically on every merge to `main`.
 
 ---
 
@@ -149,7 +153,15 @@ See [docs/todo.md](docs/todo.md) for the current feature backlog and completion 
 1. Fork the repo and create a branch from `main`
 2. Follow the component structure: every Angular component is three files (`*.ts`, `*.html`, `*.scss`) — no inline templates or styles
 3. The IPC contract in `shared/ipc-api.types.ts` must stay in sync with preload, handler, and service when adding channels
-4. There are currently no automated tests — manual testing is expected for each change
+4. `ipcRenderer.on` push-event callbacks fire outside Angular's NgZone — always wrap signal/state updates in `ngZone.run()` for `OnPush` components
+5. There are currently no automated tests — manual testing is expected for each change
+
+## Release Process
+
+Every merge to `main` triggers `.github/workflows/release.yml`, which:
+1. Bumps the patch version, commits `[skip ci]`, and tags the commit
+2. Builds the app on macOS, Windows, and Linux in parallel
+3. Creates a GitHub Release with `.dmg` (arm64 + x64), `.exe`, `.AppImage`, and auto-generated source archives
 
 ---
 

@@ -64,7 +64,7 @@ Note: `system:platform`, `system:version`, and `system:openExternal` are registe
 
 Push events (main → renderer): `repo:statusChanged`, `process:output:{id}`, and `updater:event` — emitted via `win.webContents.send(...)`. `updater:event` broadcasts to all windows via `BrowserWindow.getAllWindows().forEach(...)`. All other channels are request-response via `ipcRenderer.invoke`.
 
-**IPC push events and NgZone:** `ipcRenderer.on` callbacks execute outside Angular's NgZone. Any subscription to push-event observables (e.g. `onStatusChanged()`) must wrap state updates in `ngZone.run()` to trigger change detection. Polling via RxJS `timer()` is zone-patched automatically and does not need this treatment.
+**IPC push events and NgZone:** `ipcRenderer.on` callbacks execute outside Angular's NgZone. Any subscription to push-event observables (e.g. `onStatusChanged()`, `onUpdateEvent()`) must wrap state updates in `ngZone.run()` to trigger change detection. This applies to every component using `ChangeDetectionStrategy.OnPush` that subscribes to a push event — currently `RepositoryService`, `UpdateButtonComponent`, and `SettingsAboutTabComponent`. Polling via RxJS `timer()` is zone-patched automatically and does not need this treatment.
 
 **Multi-window isolation:** Both `worktree.ipc.ts` and `process.ipc.ts` key their in-memory maps as `${win.id}:${id}` so independent windows with different repos never share worktree or process state.
 
@@ -89,7 +89,7 @@ DevTools open automatically if `NODE_ENV=development` and `OPEN_DEV_TOOLS=true` 
 
 Standalone components throughout. All routes are lazy-loaded. `repoOpenGuard` protects every route except `/`.
 
-Routing: `/` → Welcome, `/graph` → DAG, `/conflicts` → conflict list, `/conflicts/resolve/:fileIndex` → viewer, `/conflicts/preview/:fileIndex/:option` → resolution preview, `/rebase`, `/cherry-pick`, `/settings`.
+Routing: `/` → Welcome, `/graph` → DAG, `/conflicts` → conflict list, `/conflicts/resolve/:fileIndex` → viewer, `/conflicts/preview/:fileIndex/:option` → resolution preview, `/rebase`, `/cherry-pick`, `/settings`, `/error` → full-page error (unguarded).
 
 **`RepositoryService`** manages all repo state. It combines three sources into `status$` (a `BehaviorSubject`):
 1. A `timer(0, interval)` poll — when `statusRefreshInterval` is `0`, polling is disabled and only a single immediate fetch runs.
@@ -103,6 +103,12 @@ Routing: `/` → Welcome, `/graph` → DAG, `/conflicts` → conflict list, `/co
 **`ShortcutService`** installs a global `keydown` capture listener. It reads configured combos from `SettingsService.snapshot.keyboardShortcuts` and either calls `RefreshService.trigger()`, navigates to `/settings`, or emits on `goBack$`. Components subscribe to `goBack$` contextually. Utility functions `displayParts`, `displayCombo`, and `eventToCombo` are exported for the keyboard settings tab.
 
 Monaco editor is loaded from `dist/assets/vs/` (copied from `node_modules/monaco-editor/min/vs` during build, with language workers and non-English NLS files excluded to reduce bundle size).
+
+**Titlebar layout:** `AppComponent` renders a custom titlebar split into two flex regions: `.titlebar__left` (holds `rl-app-menu` + `rl-nav-buttons`) and `.titlebar__actions` (right-side icon buttons). On macOS the `.titlebar--mac` class adds `padding-left: 78px` to `.titlebar__left` to clear the traffic-light buttons. Both regions have `-webkit-app-region: no-drag` so clicks register; the gap between them is draggable.
+
+**`NavButtonsComponent`** (`src/app/shared/components/titlebar/nav-buttons/`) — back/forward navigation arrows in the titlebar. Maintains a manual `history: string[]` + `historyIndex` updated via `NavigationEnd` router events. A `navigatingHistory` flag prevents back/forward presses from appending duplicate entries. Uses Angular `Location.back()` / `Location.forward()` for actual navigation. The host element must use `display: flex` (set in `nav-buttons.component.scss` via `:host { display: flex }`) — without it, buttons stack vertically.
+
+**Error page:** `/error` route renders `ErrorComponent` — a full-page centered card. Callers navigate via `router.navigate(['/error'], { state: { title, message } })`; the component reads `history.state` to display the right text. The natural back-button behavior dismisses the error page. Currently used by `WelcomeComponent` on repository open failure.
 
 ## Canvas Commit Graph
 
@@ -167,6 +173,21 @@ The watcher is started via `repo:watch` IPC (called from `RepositoryService.star
 **Theme system:** All colors are CSS custom properties defined on `:root` (dark defaults) and overridden under `body.theme-light`. Accent colors override `--accent` and `--accent-subtle` via `body.accent-purple/green/teal/pink`.
 
 **Font size system:** `uiFontSize` (`small` → 13px, `medium` → 14px, `large` → 16px) is applied to `document.documentElement` so that all `rem`-based font sizes across every component scale correctly. Every component uses `rem` exclusively — never `px` for font sizes.
+
+## CI/CD
+
+`.github/workflows/release.yml` runs on every push to `main` and always produces a new release. Three sequential jobs:
+
+1. **`version`** — runs `npm version patch --no-git-tag-version`, commits `package.json` + `package-lock.json` with message `chore(release): X.Y.Z [skip ci]` (the `[skip ci]` prevents an infinite loop), tags `vX.Y.Z`, and pushes to `main` using `secrets.GH_PAT`. Outputs `version` and `tag` to downstream jobs.
+2. **`build`** — matrix across `macos-latest`, `windows-latest`, `ubuntu-latest`. Checks out the tagged commit, runs `npm ci && npm run build`, then `npx electron-builder --{mac,win,linux} --publish never`. Artifacts: `.dmg` + `.zip` (mac, both arm64 + x64), `.exe` (win), `.AppImage` (linux). `CSC_IDENTITY_AUTO_DISCOVERY: false` (unsigned builds). Uploads artifacts per-platform.
+3. **`release`** — downloads all platform artifacts, creates a GitHub Release at the version tag via `softprops/action-gh-release@v2` with auto-generated release notes.
+
+**Required GitHub configuration:**
+- `secrets.GH_PAT` — a Personal Access Token with `repo` scope (used for the version-bump push and release creation, since `GITHUB_TOKEN` cannot push to protected branches)
+- Actions permissions: "Read and write permissions" under Settings → Actions → General
+- Branch protection: if `main` is protected, the PAT owner must have bypass rights or branch protection must allow bot pushes
+
+GitHub auto-generates source code `.zip` and `.tar.gz` for every tagged release.
 
 ## Environment
 

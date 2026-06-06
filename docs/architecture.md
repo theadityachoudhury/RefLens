@@ -134,7 +134,7 @@ These channels are not request-response — the main process emits them unprompt
 | `process:output:{id}` | Spawned process writes stdout/stderr | Specific window's WebContents |
 | `updater:event` | electron-updater state change | All windows (broadcast) |
 
-**NgZone note:** `ipcRenderer.on` callbacks fire outside Angular's NgZone. Any component subscribing to a push-event observable must wrap state mutations in `ngZone.run()` to trigger change detection.
+**NgZone note:** `ipcRenderer.on` callbacks fire outside Angular's NgZone. Any component using `ChangeDetectionStrategy.OnPush` that subscribes to a push-event observable must wrap state mutations in `ngZone.run()` to trigger change detection. Current components requiring this: `RepositoryService` (onStatusChanged), `UpdateButtonComponent` (onUpdateEvent), `SettingsAboutTabComponent` (onUpdateEvent).
 
 ### IPC Security
 
@@ -236,9 +236,43 @@ watcher.ts (chokidar)
 /rebase               RebaseComponent            (repoOpenGuard)
 /cherry-pick          CherryPickComponent        (repoOpenGuard)
 /settings             SettingsComponent          (repoOpenGuard)
+/error                ErrorComponent             (unguarded)
+**                    → redirect to /
 ```
 
-All routes except `/` are lazy-loaded. `repoOpenGuard` checks `RepositoryService.activeRepo$` and redirects to `/` if no repo is open.
+All routes except `/` and `/error` are lazy-loaded. `repoOpenGuard` checks `RepositoryService.activeRepo$` and redirects to `/` if no repo is open.
+
+**Error page pattern:** Navigate to `/error` with `router.navigate(['/error'], { state: { title: '...', message: '...' } })`. `ErrorComponent` reads `history.state` for the title and message. The back button in the titlebar naturally returns to the previous route.
+
+### Titlebar Layout
+
+```
+AppComponent renders:
+  <div class="titlebar" [class.titlebar--mac]="settings.isMac()">
+    <div class="titlebar__left">   ← no-drag region
+      <rl-app-menu />
+      <rl-nav-buttons />           ← back/forward arrows
+    </div>
+    <div class="titlebar__actions"> ← no-drag region
+      <rl-editor-picker />
+      <rl-refresh-button />
+      <rl-new-window-button />
+      <rl-update-button />
+      <rl-settings-button />
+    </div>
+  </div>
+
+.titlebar--mac .titlebar__left:
+  padding-left: 78px   ← clears macOS traffic-light buttons (at x:16, y:14)
+
+NavButtonsComponent:
+  `:host { display: flex }` ← required, otherwise buttons stack vertically
+  Maintains history: string[] + historyIndex
+  Updated via NavigationEnd router events
+  navigatingHistory flag prevents back/forward from appending duplicates
+  back() → historyIndex-- → location.back()
+  forward() → historyIndex++ → location.forward()
+```
 
 ### Core Services
 
@@ -488,6 +522,44 @@ User clicks commit (squared-distance < 25px)
 
 ---
 
+## CI/CD Pipeline
+
+`.github/workflows/release.yml` — triggers on every push to `main`.
+
+```
+push to main
+  └── job: version
+        ├── npm version patch --no-git-tag-version
+        ├── git commit "chore(release): X.Y.Z [skip ci]"
+        │     └── [skip ci] prevents the push from re-triggering this workflow
+        ├── git tag vX.Y.Z
+        └── git push origin main --follow-tags  (uses secrets.GH_PAT)
+              outputs: version, tag
+
+  └── job: build  (needs: version, matrix: mac / win / linux)
+        ├── checkout at tag
+        ├── npm ci && npm run build
+        ├── npx electron-builder --{mac,win,linux} --publish never
+        │     CSC_IDENTITY_AUTO_DISCOVERY: false  (unsigned)
+        ├── node scripts/clean-release.js
+        └── upload-artifact: *.dmg, *.zip, *.exe, *.AppImage
+
+  └── job: release  (needs: version, build)
+        ├── download-artifact (merge-multiple: all platforms)
+        └── softprops/action-gh-release@v2
+              tag_name: vX.Y.Z
+              generate_release_notes: true
+              files: artifacts/**
+              (GitHub auto-adds source .zip + .tar.gz for every tag)
+```
+
+**Required configuration:**
+- `secrets.GH_PAT` — PAT with `repo` scope for push + release creation
+- Actions → General → "Read and write permissions"
+- If `main` is branch-protected: PAT owner needs bypass rights
+
+---
+
 ## Multi-Window Architecture
 
 RefLens supports multiple independent windows, each showing a different repository.
@@ -554,6 +626,7 @@ RefLens/
     │       └── conflict.service.ts       Conflict state (signals)
     ├── features/
     │   ├── welcome/
+    │   ├── error/              ← full-page error route (/error)
     │   ├── graph/
     │   │   ├── graph.component.{ts,html,scss}
     │   │   └── canvas-renderer.service.ts
@@ -576,6 +649,7 @@ RefLens/
     └── shared/
         └── components/
             └── titlebar/
+                ├── nav-buttons/        ← back/forward history navigation
                 ├── editor-picker/
                 ├── refresh-button/
                 ├── new-window-button/

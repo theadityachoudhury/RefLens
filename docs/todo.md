@@ -124,6 +124,16 @@ Status key: ✅ Done · 🚧 In Progress · 📋 Planned · 💡 Idea
 
 ---
 
+## Navigation & Shell
+
+| Feature | Status | Notes |
+|---|---|---|
+| Back/forward navigation arrows in titlebar | ✅ Done | Manual history stack via `NavigationEnd` events |
+| Full-page error route `/error` | ✅ Done | Router state carries title + message; back button dismisses |
+| macOS traffic-light clearance in titlebar | ✅ Done | `padding-left: 78px` on `.titlebar--mac .titlebar__left` |
+
+---
+
 ## Infrastructure
 
 | Feature | Status | Notes |
@@ -131,17 +141,19 @@ Status key: ✅ Done · 🚧 In Progress · 📋 Planned · 💡 Idea
 | IPC security guards (injection, path traversal) | ✅ Done | `ipc-guards.ts` |
 | `contextIsolation: true`, `nodeIntegration: false` | ✅ Done | |
 | GitHub auto-updater | ✅ Done | `electron-updater`, manual download |
+| NgZone fix for OnPush + push events | ✅ Done | `UpdateButtonComponent`, `SettingsAboutTabComponent`, `RepositoryService` |
 | Multi-window support | ✅ Done | Per-window state keyed by `windowId` |
 | macOS native menu | ✅ Done | App + File (New Window) + Edit |
 | Windows/Linux custom titlebar | ✅ Done | Angular-rendered |
 | `.git` folder watcher (chokidar) | ✅ Done | 300ms debounce |
 | Editor detection (10 editors) | ✅ Done | |
+| CI/CD auto-release on every merge to main | ✅ Done | `release.yml`: version-bump → build matrix → GitHub Release |
+| macOS DMG + ZIP (arm64 + x64) | ✅ Done | Both Apple Silicon and Intel |
+| Windows NSIS installer | ✅ Done | x64 |
+| Linux AppImage | ✅ Done | x64 |
 | Bundled editor icons (per-editor SVG/PNG) | 📋 Planned | Currently extracted from `.icns` via `sips` |
 | Custom editor path configuration | 📋 Planned | User-supplied editor + CLI args |
 | Automated test suite | 📋 Planned | No tests currently exist |
-| Linux AppImage | ✅ Done | x64 |
-| macOS DMG + ZIP (arm64 + x64) | ✅ Done | Universal builds |
-| Windows NSIS installer | ✅ Done | x64 |
 
 ---
 
