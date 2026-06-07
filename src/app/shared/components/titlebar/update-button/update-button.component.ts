@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ElectronApiService } from '../../../../core/services/electron-api.service';
+import { SettingsService } from '../../../../core/services/settings.service';
 import type { UpdateEvent } from '../../../../../../shared/ipc-api.types';
 
 type UpdateState = UpdateEvent['type'] | 'idle';
@@ -21,12 +22,15 @@ type UpdateState = UpdateEvent['type'] | 'idle';
   styleUrl: './update-button.component.scss',
 })
 export class UpdateButtonComponent implements OnInit, OnDestroy {
-  private readonly api = inject(ElectronApiService);
-  private readonly ngZone = inject(NgZone);
+  private readonly api      = inject(ElectronApiService);
+  private readonly ngZone   = inject(NgZone);
+  protected readonly settings = inject(SettingsService);
   private sub?: Subscription;
 
-  protected readonly state = signal<UpdateState>('idle');
+  protected readonly state   = signal<UpdateState>('idle');
   protected readonly percent = signal(0);
+
+  protected readonly RELEASES_URL = 'https://github.com/theadityachoudhury/RefLens/releases/latest';
 
   ngOnInit(): void {
     this.sub = this.api.onUpdateEvent().subscribe((event) => {
@@ -47,6 +51,10 @@ export class UpdateButtonComponent implements OnInit, OnDestroy {
   }
 
   install(): void {
-    this.api.installUpdate().subscribe();
+    if (this.settings.isMac()) {
+      this.api.openExternal(this.RELEASES_URL).subscribe();
+    } else {
+      this.api.installUpdate().subscribe();
+    }
   }
 }

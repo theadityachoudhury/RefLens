@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ElectronApiService } from '../../../core/services/electron-api.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import type { UpdateEvent } from '../../../../../shared/ipc-api.types';
 
 type UpdateState = UpdateEvent['type'] | 'idle';
@@ -21,9 +22,12 @@ type UpdateState = UpdateEvent['type'] | 'idle';
   styleUrl: './about-tab.component.scss',
 })
 export class SettingsAboutTabComponent implements OnInit, OnDestroy {
-  private readonly api = inject(ElectronApiService);
-  private readonly ngZone = inject(NgZone);
+  private readonly api     = inject(ElectronApiService);
+  private readonly ngZone  = inject(NgZone);
+  protected readonly settings = inject(SettingsService);
   private sub?: Subscription;
+
+  protected readonly RELEASES_URL = 'https://github.com/theadityachoudhury/RefLens/releases/latest';
 
   protected readonly version      = signal('');
   protected readonly updateState  = signal<UpdateState>('idle');

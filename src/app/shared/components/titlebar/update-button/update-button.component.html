@@ -7,7 +7,8 @@
     <span class="update-btn__percent">{{ percent() }}%</span>
   </button>
 } @else if (state() === 'downloaded') {
-  <button class="titlebar-btn titlebar-btn--icon update-btn update-btn--ready" (click)="install()" title="Restart to install update">
+  <button class="titlebar-btn titlebar-btn--icon update-btn update-btn--ready" (click)="install()"
+    [title]="settings.isMac() ? 'Update ready — open releases page' : 'Restart to install update'">
     <span class="icon icon-update"></span>
   </button>
 }

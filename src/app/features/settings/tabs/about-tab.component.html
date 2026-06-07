@@ -42,15 +42,18 @@
     </div>
     <div class="settings-row__control">
       @if (updateState() === 'downloaded') {
-        <button class="btn btn--accent btn--sm" (click)="install()">Restart &amp; Install</button>
-        <button class="btn btn--ghost btn--sm" (click)="open('https://github.com/theadityachoudhury/RefLens/releases/latest')">View Release ↗</button>
+        @if (settings.isMac()) {
+          <button class="btn btn--accent btn--sm" (click)="open(RELEASES_URL)">Open Latest Release ↗</button>
+        } @else {
+          <button class="btn btn--accent btn--sm" (click)="install()">Restart &amp; Install</button>
+        }
       } @else if (updateState() === 'downloading') {
         <button class="btn btn--ghost btn--sm" disabled>Downloading {{ percent() }}%…</button>
       } @else if (updateState() === 'available') {
         <button class="btn btn--accent btn--sm" (click)="download()">Download Update</button>
       } @else if (updateState() === 'error') {
         <button class="btn btn--ghost btn--sm" (click)="check()">Retry</button>
-        <button class="btn btn--ghost btn--sm" (click)="open('https://github.com/theadityachoudhury/RefLens/releases/latest')">View Release ↗</button>
+        <button class="btn btn--ghost btn--sm" (click)="open(RELEASES_URL)">View Release ↗</button>
       } @else {
         <button class="btn btn--ghost btn--sm" [disabled]="updateState() === 'checking'" (click)="check()">
           {{ updateState() === 'checking' ? 'Checking…' : 'Check for Updates' }}
