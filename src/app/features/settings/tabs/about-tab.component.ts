@@ -25,9 +25,10 @@ export class SettingsAboutTabComponent implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private sub?: Subscription;
 
-  protected readonly version     = signal('');
-  protected readonly updateState = signal<UpdateState>('idle');
-  protected readonly percent     = signal(0);
+  protected readonly version      = signal('');
+  protected readonly updateState  = signal<UpdateState>('idle');
+  protected readonly percent      = signal(0);
+  protected readonly errorMessage = signal('');
 
   protected statusHint(): string {
     switch (this.updateState()) {
@@ -36,7 +37,7 @@ export class SettingsAboutTabComponent implements OnInit, OnDestroy {
       case 'not-available': return 'You are on the latest version';
       case 'downloading':   return `Downloading update (${this.percent()}%)`;
       case 'downloaded':    return 'Update downloaded — restart to apply';
-      case 'error':         return 'Could not check for updates';
+      case 'error':         return this.errorMessage() || 'Could not check for updates';
       default:              return 'Up to date';
     }
   }
@@ -45,8 +46,10 @@ export class SettingsAboutTabComponent implements OnInit, OnDestroy {
     this.api.getAppVersion().subscribe((v) => this.version.set(v));
     this.sub = this.api.onUpdateEvent().subscribe((event) => {
       this.ngZone.run(() => {
+        if (this.updateState() === 'downloaded' && event.type === 'error') return;
         this.updateState.set(event.type);
         if (event.type === 'downloading') this.percent.set(Math.round(event.percent));
+        if (event.type === 'error') this.errorMessage.set(event.message);
       });
     });
   }

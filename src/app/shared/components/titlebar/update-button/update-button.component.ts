@@ -31,6 +31,7 @@ export class UpdateButtonComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.sub = this.api.onUpdateEvent().subscribe((event) => {
       this.ngZone.run(() => {
+        if (this.state() === 'downloaded' && event.type === 'error') return;
         this.state.set(event.type);
         if (event.type === 'downloading') this.percent.set(Math.round(event.percent));
       });
