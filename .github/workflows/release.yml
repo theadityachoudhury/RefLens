@@ -43,6 +43,8 @@ jobs:
           git add package.json package-lock.json
           git commit -m "chore(release): $VERSION [skip ci]"
           git tag "v$VERSION"
+          git tag
+          git push origin --tags
           git push origin main --follow-tags
 
   # ── 2. Build on each platform (parallel) ─────────────────────────────────
