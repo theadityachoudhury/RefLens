@@ -40,7 +40,9 @@ export class SettingsAboutTabComponent implements OnInit, OnDestroy {
       case 'available':     return 'A new version is ready to download';
       case 'not-available': return 'You are on the latest version';
       case 'downloading':   return `Downloading update (${this.percent()}%)`;
-      case 'downloaded':    return 'Update downloaded — restart to apply';
+      case 'downloaded':    return this.settings.isMac()
+                             ? 'Update downloaded — open the releases page to install'
+                             : 'Update downloaded — restart to apply';
       case 'error':         return this.errorMessage() || 'Could not check for updates';
       default:              return 'Up to date';
     }

@@ -10,7 +10,8 @@ function broadcast(event: UpdateEvent): void {
 export function registerUpdaterHandlers(): void {
   autoUpdater.logger = log;
   autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
+  // macOS unsigned builds cannot self-patch; disable silent install on quit to avoid silent failures
+  autoUpdater.autoInstallOnAppQuit = process.platform !== 'darwin';
 
   autoUpdater.on('checking-for-update', () => broadcast({ type: 'checking' }));
   autoUpdater.on('update-available', (info) => broadcast({ type: 'available', version: info.version }));
@@ -21,7 +22,8 @@ export function registerUpdaterHandlers(): void {
 
   ipcMain.handle('updater:check', () => autoUpdater.checkForUpdates());
   ipcMain.handle('updater:download', () => autoUpdater.downloadUpdate());
-  ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall());
+  // isSilent=true, isForceRunAfter=true: installer runs silently and relaunches the app automatically
+  ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall(true, true));
 }
 
 export function checkForUpdatesOnStartup(): void {
