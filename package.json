@@ -1,6 +1,6 @@
 {
   "name": "reflens",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Git Visualizer Client — visual merge conflicts, rebase, cherry-pick",
   "main": "dist-electron/electron/src/main.js",
   "scripts": {
