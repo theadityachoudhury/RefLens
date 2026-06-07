@@ -17,9 +17,7 @@ for (const entry of fs.readdirSync(releaseDir)) {
   );
 
   const isExtraFile =
-    entry.endsWith('.blockmap') ||
-    entry.startsWith('builder-') ||
-    entry.startsWith('latest');
+    entry.startsWith('builder-');
 
   if (isUnpackedDir || isExtraFile) {
     fs.rmSync(fullPath, { recursive: true, force: true });
